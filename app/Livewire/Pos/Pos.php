@@ -14,6 +14,7 @@ class Pos extends Component
     public $cartsCount;
     public $productInCart = [];
     public $discount;
+    public $subTotalCart = 0;
 
     public function mount()
     {
@@ -113,6 +114,7 @@ class Pos extends Component
         $this->carts = Cart::where('cashierId', Auth::id())->get();
         $this->cartsCount = Cart::where('cashierId', Auth::id())->get()->count();
         $this->productInCart = $this->carts->pluck('productId')->toArray();
+        $this->subTotalCart = $this->carts->sum('price');
     }
 
     public function triggerEvent()

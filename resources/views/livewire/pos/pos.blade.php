@@ -115,7 +115,7 @@
                                 <table class="table table-responsive table-borderless">
                                     <tr>
                                         <td>Sub Total</td>
-                                        <td class="text-end">$60,454</td>
+                                        <td class="text-end">Rp. {{ number_format($subTotalCart, 0, ',', '.') }}</td>
                                     </tr>
                                     <tr>
                                         <td class="danger">Discount (10%)</td>
