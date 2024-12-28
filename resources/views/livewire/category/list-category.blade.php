@@ -30,7 +30,7 @@
                 </li>
             </ul>
             <div class="page-btn">
-                <a href="#" class="btn btn-added" data-bs-toggle="modal" data-bs-target="#add-category">
+                <a href="#" class="btn btn-added" data-bs-toggle="modal" data-bs-target="#category-modal">
                     <i data-feather="plus-circle" class="me-2"></i>Add New Category</a>
             </div>
         </div>
@@ -38,14 +38,16 @@
         @if (session()->has('error'))
             <div class="alert alert-solid-danger alert-dismissible fade show" role="alert">
                 {{ session('error') }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"><i class="fas fa-xmark"></i></button>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"><i
+                        class="fas fa-xmark"></i></button>
             </div>
         @endif
 
         @if (session()->has('success'))
             <div class="alert alert-solid-success alert-dismissible fade show" role="alert">
                 {{ session('success') }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"><i class="fas fa-xmark"></i></button>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"><i
+                        class="fas fa-xmark"></i></button>
             </div>
         @endif
 
@@ -81,7 +83,8 @@
                                         </label>
                                     </td>
                                     <td>{{ $category->category }}</td>
-                                    <td>{{ \Carbon\Carbon::parse($category->created_at)->locale('id')->isoFormat('D MMMM YYYY') ?? '' }}</td>
+                                    <td>{{ \Carbon\Carbon::parse($category->created_at)->locale('id')->isoFormat('D MMMM YYYY') ?? '' }}
+                                    </td>
                                     <td>
                                         <span
                                             class="badge {{ $category->status === 'Active' ? 'badge-linesuccess' : 'badge-linedanger' }}">
@@ -90,31 +93,13 @@
                                     </td>
                                     <td class="action-table-data">
                                         <div class="edit-delete-action">
-                                             <a class="me-2 p-2" href="javascript:void(0);" data-bs-toggle="modal" data-bs-target="#edit-category-{{ $category->id }}">
+                                            <a class="me-2 p-2" href="javascript:void(0);" data-bs-toggle="modal"
+                                                data-bs-target="#category-modal"
+                                                onclick="setCategoryData({{ $category->id }})">
                                                 <i data-feather="edit" class="feather-edit"></i>
                                             </a>
-                                            <div class="modal fade" id="edit-category-{{ $category->id }}">
-                                                <div class="modal-dialog modal-dialog-centered custom-modal-two">
-                                                    <div class="modal-content">
-                                                        <div class="page-wrapper-new p-0">
-                                                            <div class="content">
-                                                                <div class="modal-header border-0 custom-modal-header">
-                                                                    <div class="page-title">
-                                                                        <h4>Edit Category</h4>
-                                                                    </div>
-                                                                    <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
-                                                                        <span aria-hidden="true">&times;</span>
-                                                                    </button>
-                                                                </div>
-                                                                <div class="modal-body custom-modal-body">
-                                                                    <livewire:category.form-category-edit :categoryId="$category->id" />
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <a class="p-2" wire:click="deleteCategory({{ $category->id }})" onclick="return confirm('Are you sure you want to delete this category?');">
+                                            <a class="confirm-text p-2"
+                                                wire:click="deleteCategory({{ $category->id }})">
                                                 <i data-feather="trash-2" class="feather-trash-2"></i>
                                             </a>
                                         </div>
@@ -128,14 +113,16 @@
         </div>
     </div>
 
-    <div class="modal fade" id="add-category">
+    <!-- Modal for Add/Edit Category -->
+    <div class="modal fade" id="category-modal" tabindex="-1" aria-labelledby="category-modal-label"
+        aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered custom-modal-two">
             <div class="modal-content">
                 <div class="page-wrapper-new p-0">
                     <div class="content">
                         <div class="modal-header border-0 custom-modal-header">
                             <div class="page-title">
-                                <h4>Create Category</h4>
+                                <h4 id="modal-title">Create Category</h4>
                             </div>
                             <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
                                 <span aria-hidden="true">&times;</span>
@@ -151,4 +138,26 @@
     </div>
 
 </div>
+<script>
+    function showCreateModal() {
+        console.log('Opening create modal');
+        document.getElementById('modal-title').innerText = 'Create Category';
 
+        // Dispatch event untuk reset form
+        const resetEvent = new CustomEvent('resetForm');
+        window.dispatchEvent(resetEvent);
+    }
+
+    function setCategoryData(categoryId) {
+        console.log('Event will be dispatched with categoryId: ', categoryId);
+        document.getElementById('modal-title').innerText = 'Edit Category';
+
+        // Dispatch event dengan ID kategori
+        const event = new CustomEvent('setCategoryData', {
+            detail: {
+                categoryId: categoryId
+            },
+        });
+        window.dispatchEvent(event);
+    }
+</script>

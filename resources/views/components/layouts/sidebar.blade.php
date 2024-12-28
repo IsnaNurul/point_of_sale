@@ -6,21 +6,22 @@
                     <h6 class="submenu-hdr">Main</h6>
                     <ul>
                         <li class="{{ Request::is('dashboard*') ? 'active' : '' }}">
-                            <a href="{{ route('dashboard') }}"><i data-feather="grid"></i><span>Dashboard</span></span></a>
+                            <a href="{{ route('dashboard') }}"><i
+                                    data-feather="grid"></i><span>Dashboard</span></span></a>
                         </li>
                     </ul>
                 </li>
                 <li class="submenu-open">
                     <h6 class="submenu-hdr">Inventory</h6>
                     <ul>
-                        <li class="{{ Request::is('products*') ? 'active' : '' }}">
-                            <a href="{{ route('products') }}" ><i data-feather="box"></i><span>Products</span></a>
-                        </li>
                         <li class="{{ Request::is('category*') ? 'active' : '' }}">
                             <a href="{{ route('category') }}"><i data-feather="codepen"></i><span>Category</span></a>
                         </li>
                         <li class="{{ Request::is('units*') ? 'active' : '' }}">
                             <a href="{{ route('units') }}"><i data-feather="speaker"></i><span>Units</span></a>
+                        </li>
+                        <li class="{{ Request::is('products*') ? 'active' : '' }}">
+                            <a href="{{ route('products') }}"><i data-feather="box"></i><span>Products</span></a>
                         </li>
                     </ul>
                 </li>

@@ -18,7 +18,6 @@ return new class extends Migration
             $table->integer('price')->default(0);
             $table->integer('qty')->default(0);
             $table->string('description')->nullable();
-            $table->integer('discount')->default(0)->nullable();
             $table->boolean('status')->default(true);
             $table->tinyText('image')->nullable();
             $table->foreignId('categoryId')->constrained('categories')->cascadeOnDelete()->cascadeOnUpdate();
