@@ -10,15 +10,13 @@ class ListCategory extends Component
 {
     public $categories;
 
-    public function mount() 
+    public function mount()
     {
         $this->categories = Category::all();
-        // $this->refreshCategory();
     }
 
     public function deleteCategory($id)
     {
-        // dd($id);
         try {
             // Cari kategori berdasarkan ID
             $category = Category::findOrFail($id);
@@ -29,20 +27,22 @@ class ListCategory extends Component
                     return;
                 }
                 $category->delete();
-                $this->categories = Category::all();
-                // $this->refreshCategory();
-                // $this->dispatchBrowserEvent('categoryDeleted');
+                $this->refreshCategory();
                 session()->flash('success', 'Category deleted successfully!');
             } else {
                 session()->flash('error', 'Category not defined!');
-                
             }
         } catch (QueryException $e) {
-            if ($e->getCode() == '23000') {
-                session()->flash('error', 'Cannot delete category because it is being used in other data.');
-            } else {
-                session()->flash('error', 'An error occurred while deleting the category.');
-            }
+            $this->handleQueryException($e);
+        }
+    }
+
+    private function handleQueryException(QueryException $e)
+    {
+        if ($e->getCode() === '23000') {
+            session()->flash('error', 'Cannot delete category because it is being used in other data.');
+        } else {
+            session()->flash('error', 'An error occurred while deleting the category.');
         }
     }
 

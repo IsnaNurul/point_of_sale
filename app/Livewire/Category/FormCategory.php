@@ -8,28 +8,62 @@ use Livewire\Livewire;
 
 class FormCategory extends Component
 {
-    public $category;
-    public $status;
+    public $categoryId = null;
+    public $category = '';
+    public $status = 'Active';
 
-    protected $rules = [
-        'category' => 'required|unique:categories,category',
-        'status' => 'required'
-    ];
+    protected $listeners = ['setCategoryData'];
+
+    public function setCategoryData($categoryId)
+    {
+        $this->categoryId = $categoryId;
+
+        if ($categoryId) {
+            $category = Category::find($categoryId);
+            if ($category) {
+                $this->category = $category->category;
+                $this->status = $category->status;
+            }
+        }
+    }
+
+    public function mount($categoryId = null)
+    {
+        if ($categoryId) {
+            $this->categoryId = $categoryId;
+        } elseif ($this->categoryId) {
+            $category = Category::find($this->categoryId);
+            if ($category) {
+                $this->category = $category->category;
+                $this->status = $category->status;
+            }
+        }
+    }
 
     public function saveCategory()
     {
-        $this->validate();
-
-        Category::create([
-            'category' => $this->category,
-            'status' => $this->status,
+        $this->validate([
+            'category' => 'required|string|max:255',
+            'status' => 'required|in:Active,Inactive',
         ]);
 
-        session()->flash('success', 'Category successfully created!');
+        if ($this->categoryId) {
+            $category = Category::find($this->categoryId);
+            $category->update([
+                'category' => $this->category,
+                'status' => $this->status,
+            ]);
+            session()->flash('success', 'Category updated successfully!');
+        } else {
+            Category::create([
+                'category' => $this->category,
+                'status' => $this->status,
+            ]);
+            session()->flash('success', 'Category created successfully!');
+        }
 
         return redirect('category');
     }
-
 
     public function render()
     {

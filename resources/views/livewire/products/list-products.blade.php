@@ -8,12 +8,12 @@
         </div>
         <ul class="table-top-head">
             <li>
-                <a data-bs-toggle="tooltip" data-bs-placement="top" title="Pdf"><img
-                        src="assets/img/icons/pdf.svg" alt="img" /></a>
+                <a data-bs-toggle="tooltip" data-bs-placement="top" title="Pdf"><img src="assets/img/icons/pdf.svg"
+                        alt="img" /></a>
             </li>
             <li>
-                <a data-bs-toggle="tooltip" data-bs-placement="top" title="Excel"><img
-                        src="assets/img/icons/excel.svg" alt="img" /></a>
+                <a data-bs-toggle="tooltip" data-bs-placement="top" title="Excel"><img src="assets/img/icons/excel.svg"
+                        alt="img" /></a>
             </li>
             <li>
                 <a data-bs-toggle="tooltip" data-bs-placement="top" title="Print"><i data-feather="printer"
@@ -29,11 +29,28 @@
             </li>
         </ul>
         <div class="page-btn">
-            <a href="{{ route('products.form') }}" class="btn btn-added"><i data-feather="plus-circle" class="me-2"></i>Add
+            <a href="{{ route('products.form') }}" class="btn btn-added"><i data-feather="plus-circle"
+                    class="me-2"></i>Add
                 New
                 Product</a>
         </div>
     </div>
+
+    @if (session()->has('error'))
+        <div class="alert alert-solid-danger alert-dismissible fade show" role="alert">
+            {{ session('error') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"><i
+                    class="fas fa-xmark"></i></button>
+        </div>
+    @endif
+
+    @if (session()->has('success'))
+        <div class="alert alert-solid-success alert-dismissible fade show" role="alert">
+            {{ session('success') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"><i
+                    class="fas fa-xmark"></i></button>
+        </div>
+    @endif
 
     <div class="card table-list-card">
         <div class="card-body">
@@ -56,7 +73,7 @@
                             <th>Price</th>
                             <th>Unit</th>
                             <th>Qty</th>
-                            <th>Discount</th>
+                            <th>Status</th>
                             <th class="no-sort">Action</th>
                         </tr>
                     </thead>
@@ -72,9 +89,12 @@
                                     </td>
                                     <td>
                                         <div class="productimgname">
-                                            <a href="javascript:void(0);" class="product-img stock-img">
-                                                <img src="assets/img/products/stock-img-01.png" alt="product" />
-                                            </a>
+                                            @if ($product->image)
+                                                <img src="{{ asset('storage/' . $product->image) }}" alt="Product Image"
+                                                    width="50" height="50" />
+                                            @else
+                                                <span>No Image</span>
+                                            @endif
                                             <a href="javascript:void(0);">{{ $product->name ?? 'N/A' }}</a>
                                         </div>
                                     </td>
@@ -83,26 +103,35 @@
                                     <td>{{ $product->price ?? '' }}</td>
                                     <td>{{ $product->unit->short_name ?? '' }}</td>
                                     <td>{{ $product->qty ?? '' }}</td>
-                                    <td>{{ $product->discount ?? '' }}</td>
+                                    <td>
+                                        <span
+                                            class="badge {{ $product->status == 1 ? 'badge-linesuccess' : 'badge-linedanger' }}">
+                                            {{ $product->status == 1 ? 'Active' : 'Inactive' }}
+                                        </span>
+                                    </td>
                                     <td class="action-table-data">
                                         <div class="edit-delete-action">
                                             <a class="me-2 edit-icon p-2" href="product-details.html">
                                                 <i data-feather="eye" class="feather-eye"></i>
                                             </a>
-                                            <a class="me-2 p-2" href="edit-product.html">
+                                            <a class="me-2 p-2" href="{{ route('products.form', $product->id) }}">
                                                 <i data-feather="edit" class="feather-edit"></i>
                                             </a>
-                                            <a class="confirm-text p-2" href="javascript:void(0);">
+
+                                            <a class="confirm-text p-2" href="javascript:void(0);"
+                                                wire:click="deleteProduct({{ $product->id }})">
                                                 <i data-feather="trash-2" class="feather-trash-2"></i>
                                             </a>
                                         </div>
                                     </td>
-                                </tr> 
+                                </tr>
                             @endforeach
                         @else
-                        <tr>
-                            <td colspan="9"><p class="text-center">Products Not Found.</p></td>
-                        </tr>
+                            <tr>
+                                <td colspan="9">
+                                    <p class="text-center">Products Not Found.</p>
+                                </td>
+                            </tr>
                         @endif
                     </tbody>
                 </table>
@@ -110,4 +139,3 @@
         </div>
     </div>
 </div>
-
