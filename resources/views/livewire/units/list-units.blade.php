@@ -85,7 +85,7 @@
                                     </td>
                                     <td>{{ $unit->name }}</td>
                                     <td>{{ $unit->short_name }}</td>
-                                    <td>{{ $unit->created_at->format('d M Y') }}</td>
+                                    <td>{{ $unit->created_at ? $$unit->created_at->format('d M Y') : '' }}</td>
                                     <td>
                                         <span
                                             class="badge {{ $unit->status == true ? 'badge-linesuccess' : 'badge-linedanger' }}">
