@@ -4,6 +4,7 @@ namespace App\Livewire\Pos;
 
 use App\Models\Cart;
 use App\Models\Product;
+use App\Models\SaleTransaction;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 
@@ -15,6 +16,10 @@ class Pos extends Component
     public $productInCart = [];
     public $discount;
     public $subTotalCart = 0;
+    public $totalDiscount = 0;
+    public $discountNominal = 0;
+    public $totalCart = 0;
+    public $transactionId = 0;
 
     public function mount()
     {
@@ -115,7 +120,91 @@ class Pos extends Component
         $this->cartsCount = Cart::where('cashierId', Auth::id())->get()->count();
         $this->productInCart = $this->carts->pluck('productId')->toArray();
         $this->subTotalCart = $this->carts->sum('price');
+        $this->totalDiscount = $this->carts->sum('discount');
+        $this->totalCart = $this->subTotalCart - $this->totalDiscount;
+        $this->transactionId = SaleTransaction::whereDate('created_at', now()->toDateString())
+            ->orderBy('id', 'desc')
+            ->first();
+
+        foreach ($this->carts as $cart) {
+            if ($cart->discount > 0 && $cart->discount <= 100) {
+                $cart->discountNominal = round($cart->price * ($cart->discount / 100));
+            } else {
+                $cart->discountNominal = $cart->discount;
+            }
+        }
     }
+
+    public function getDiscountNominalAttribute()
+    {
+        if ($this->discount > 0 && $this->discount < 100) {
+            return round($this->cart * ($this->discount / 100));
+        }
+        return $this->discount;
+    }
+
+    public function holdOrder()
+    {
+        if (count($this->carts) === 0) {
+            session()->flash('error', 'Cart is empty. Please add products to cart before holding.');
+            return;
+        }
+
+        // Ambil tanggal hari ini dalam format YYMMDD
+        $today = now()->format('ymd');
+
+        // Ambil nomor urut terakhir untuk tanggal hari ini
+        $lastTransaction = \App\Models\SaleTransaction::whereDate('created_at', now()->toDateString())
+            ->orderBy('id', 'desc')
+            ->first();
+
+        // Tentukan nomor urut baru
+        $sequence = $lastTransaction ? intval(substr($lastTransaction->transaction_code, -4)) + 1 : 1;
+
+        // Format nomor urut menjadi 4 digit
+        $formattedSequence = str_pad($sequence, 4, '0', STR_PAD_LEFT);
+
+        // Buat kode transaksi
+        $transactionCode = $today . $formattedSequence;
+
+        // Calculate totals
+        $subTotal = $this->subTotalCart;
+        $totalDiscount = $this->totalDiscount;
+        $totalPrice = $subTotal - $totalDiscount;
+
+        // Save to sale_transactions table
+        $saleTransaction = \App\Models\SaleTransaction::create([
+            'transaction_code' => $transactionCode,
+            'total_qty' => $this->carts->sum('qty'),
+            'total_price' => $totalPrice,
+            'sub_total' => $subTotal,
+            'discount' => $totalDiscount,
+            'status' => 'hold', // Status is set to hold
+            'payment_method' => null, // No payment method for hold
+            'discountId' => null, // Adjust if applicable
+            'customerId' => null, // Adjust if applicable
+            'cashierId' => Auth::id(), // Set the current logged-in cashier
+        ]);
+
+        // dd($saleTransaction);
+
+        // Save each cart item to sale_items table
+        foreach ($this->carts as $cart) {
+            \App\Models\SaleItem::create([
+                'saleId' => $saleTransaction->id,
+                'productId' => $cart->product->id,
+                'qty' => $cart->qty,
+                'price' => $cart->price,
+            ]);
+        }
+
+        // Clear cart
+        $this->clearCart();
+
+        session()->flash('success', 'Order successfully held.');
+    }
+
+
 
     public function triggerEvent()
     {
