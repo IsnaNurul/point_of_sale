@@ -116,23 +116,6 @@
                                                 data-bs-target="#editDiscount{{ $cart->id }}">
                                                 <i data-feather="edit" class="feather-14"></i>
                                             </a>
-                                            <div class="modal fade" id="editDiscount{{ $cart->id }}" tabindex="-1"
-                                                aria-labelledby="editDiscountModalLabel" aria-hidden="true">
-                                                <div class="modal-dialog">
-                                                    <div class="modal-content">
-                                                        <div class="modal-header">
-                                                            <h5 class="modal-title" id="editProductModalLabel">Edit
-                                                                Product</h5>
-                                                            <button type="button" class="btn-close"
-                                                                wire:click="closeModal"></button>
-                                                        </div>
-                                                        <div class="modal-body">
-                                                            <livewire:pos.form-discount :cartId="$cart->id" />
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-
                                             <a class="btn-icon delete-icon"
                                                 wire:click="deleteCartItem({{ $cart->id }})">
                                                 <i data-feather="trash-2" class="feather-14"></i>
@@ -161,8 +144,9 @@
                             </div>
                         </div>
                         <div class="d-grid btn-block">
-                            <a class="btn btn-secondary" href="javascript:void(0);">
-                                Grand Total : $64,024.5
+                            <a class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#category-modal"
+                                onclick="setTotalCart({{ $totalCart }})">
+                                <p style="font-size: 20px">Rp. {{ number_format($totalCart, 0, ',', '.') }}</p>
                             </a>
                         </div>
                         <div class="btn-row d-sm-flex align-items-center justify-content-between">
@@ -179,5 +163,57 @@
                 </aside>
             </div>
         </div>
+        <!-- Modal for Add/Edit Category -->
+        <div class="modal fade" id="category-modal" tabindex="-1" aria-labelledby="category-modal-label"
+            data-bs-backdrop="static" aria-hidden="true" role="dialog">
+            <div class="modal-dialog modal-dialog-centered custom-modal-two" >
+                <div class="modal-content">
+                    <div class="page-wrapper-new p-0">
+                        <div class="content">
+                            <div class="modal-body custom-modal-body">
+                                <livewire:pos.form-payment />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
+
+<script>
+    function showCreateModal() {
+        console.log('Opening create modal');
+        document.getElementById('modal-title').innerText = 'Create Category';
+
+        // Dispatch event untuk reset form
+        const resetEvent = new CustomEvent('resetForm');
+        window.dispatchEvent(resetEvent);
+    }
+
+    function setTotalCart(totalCart) {
+        console.log('Event will be dispatched with categoryId: ', totalCart);
+
+        // Dispatch event dengan ID kategori
+        const event = new CustomEvent('setTotalCart', {
+            detail: {
+                totalCart: totalCart
+            },
+        });
+        window.dispatchEvent(event);
+    }
+</script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const modal = document.getElementById('category-modal');
+
+        modal.addEventListener('hidden.bs.modal', () => {
+            console.log('Modal closed, resetting data...');
+
+            // Dispatch event untuk reset data di modal
+            const resetEvent = new CustomEvent('resetForm');
+            window.dispatchEvent(resetEvent);
+        });
+    });
+</script>

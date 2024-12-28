@@ -17,6 +17,8 @@ return new class extends Migration
             $table->foreignId('productId')->constrained('products');
             $table->integer('qty')->default(0);
             $table->integer('price')->default(0);
+            $table->integer('discount')->default(0)->nullable();
+            $table->string('discount_type')->nullable();
             $table->timestamps();
         });
     }

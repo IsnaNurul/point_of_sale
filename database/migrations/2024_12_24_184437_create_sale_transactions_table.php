@@ -20,6 +20,7 @@ return new class extends Migration
             $table->integer('discount')->default(0)->nullable();
             $table->string('status')->default('success');
             $table->string('payment_method')->nullable();
+            $table->string('rekening')->nullable();
             $table->string('payment_ammount')->nullable();
             $table->foreignId('discountId')->nullable()->constrained('discounts');
             $table->foreignId('customerId')->nullable()->constrained('customers');

@@ -27,6 +27,11 @@ class Pos extends Component
         $this->updateCarts();
     }
 
+    public function closeModal()
+    {
+        $this->updateCarts();
+    }
+
     public function addToCart($productId)
     {
         $product = Product::find($productId);
@@ -196,6 +201,17 @@ class Pos extends Component
                 'qty' => $cart->qty,
                 'price' => $cart->price,
             ]);
+
+            // Update product stock
+            $product = \App\Models\Product::find($cart->product->id);
+            if ($product) {
+                $product->qty -= $cart->qty;
+                if ($product->qty < 0) {
+                    session()->flash('error', 'Insufficient stock for product: ' . $product->name);
+                    return;
+                }
+                $product->save();
+            }
         }
 
         // Clear cart
@@ -203,8 +219,6 @@ class Pos extends Component
 
         session()->flash('success', 'Order successfully held.');
     }
-
-
 
     public function triggerEvent()
     {
