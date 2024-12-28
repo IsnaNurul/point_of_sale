@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('code')->unique()->nullable();
             $table->text('description')->nullable();
             $table->integer('value')->default(0);
+            $table->string('discount_type')->nullable();
             $table->timestamp('start_at')->nullable();
             $table->timestamp('end_at')->nullable();
             $table->integer('limit')->default(0);

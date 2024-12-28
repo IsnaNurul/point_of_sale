@@ -2,11 +2,25 @@
     <div class="content pos-design p-0">
         <div class="row align-items-start pos-wrapper">
             @if (session()->has('error'))
-                <div class="alert alert-danger">
-                    {{ session('error') }}
+                <div class="p-3">
+                    <div class="alert alert-solid-danger alert-dismissible fade show" role="alert">
+                        {{ session('error') }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"><i
+                                class="fas fa-xmark"></i></button>
+                    </div>
                 </div>
             @endif
             <div class="col-md-12 col-lg-8">
+                <div class="btn-row d-sm-flex align-items-center">
+                    <a href="javascript:void(0);" class="btn btn-secondary mb-xs-3" data-bs-toggle="modal"
+                        data-bs-target="#orders"><span class="me-1 d-flex align-items-center"><i
+                                data-feather="shopping-cart" class="feather-16"></i></span>View Orders</a>
+                    <a href="javascript:void(0);" class="btn btn-info"><span class="me-1 d-flex align-items-center"><i
+                                data-feather="rotate-cw" class="feather-16"></i></span>Reset</a>
+                    <a href="javascript:void(0);" class="btn btn-primary" data-bs-toggle="modal"
+                        data-bs-target="#recents"><span class="me-1 d-flex align-items-center"><i
+                                data-feather="refresh-ccw" class="feather-16"></i></span>Transaction</a>
+                </div>
                 <div class="pos-categories tabs_wrapper">
                     <div class="pos-products">
                         <div class="d-flex align-items-center justify-content-between">
@@ -166,7 +180,7 @@
         <!-- Modal for Add/Edit Category -->
         <div class="modal fade" id="category-modal" tabindex="-1" aria-labelledby="category-modal-label"
             data-bs-backdrop="static" aria-hidden="true" role="dialog">
-            <div class="modal-dialog modal-dialog-centered custom-modal-two" >
+            <div class="modal-dialog modal-dialog-centered custom-modal-two">
                 <div class="modal-content">
                     <div class="page-wrapper-new p-0">
                         <div class="content">
