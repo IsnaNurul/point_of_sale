@@ -5,6 +5,7 @@ namespace App\Livewire\Pos;
 use App\Models\Bank;
 use App\Models\Cart;
 use App\Models\Discount;
+use App\Models\Product;
 use App\Models\SaleItem;
 use App\Models\SaleTransaction;
 use Illuminate\Support\Facades\Auth;
@@ -23,13 +24,34 @@ class FormPayment extends Component
     public $payment_ammount;
     public $vouchers;
     public $voucherCode;
+    public $cartId;
+    public $qty;
+    public $noted;
 
     public $showPaymentModal = true; // Modal pembayaran awal
     public $showSuccessModal = false; // Modal sukses
+    public $addCartModal = false; // Modal sukses
+    public $showInvoiceModal = false;
     public $changeAmount = 0; // Uang kembalian
     public $totalAmount = 0; // Uang kembalian
 
-    protected $listeners = ['setTotalCart'];
+    protected $listeners = ['setTotalCart', 'addDiscount', 'showInvoice'];
+
+    public function closeModal()
+    {
+        return redirect('pos');
+    }
+
+    public function showInvoice()
+    {
+
+        $this->showPaymentModal = false;
+        $this->showSuccessModal = false;
+        $this->showInvoiceModal = true;
+        $this->addCartModal = false;
+
+        $this->dispatch('showInvoice');
+    }
 
     public function setTotalCart($totalCart)
     {
@@ -38,11 +60,19 @@ class FormPayment extends Component
             ->orderBy('id', 'desc')
             ->first();
 
-        $this->codeTransaction = $lastTransaction->transaction_code;
+        // Check if $lastTransaction is null
+        $this->codeTransaction = $lastTransaction ? $lastTransaction->transaction_code : null;
+
         $this->bank = Bank::all();
-        $this->dispatch('totalCartUpdated', ['totalCart' => $totalCart]);
         $this->carts = Cart::where('cashierId', Auth::id())->get();
         $this->vouchers = Discount::where('status', 1)->get();
+
+        $this->showPaymentModal = true;
+        $this->showSuccessModal = false;
+        $this->addCartModal = false;
+        $this->showInvoiceModal = false;
+
+        $this->dispatch('totalCartUpdated', ['totalCart' => $totalCart]);
     }
 
     public function mount($totalCart = null, $codeTransaction = null)
@@ -52,10 +82,57 @@ class FormPayment extends Component
             ->orderBy('id', 'desc')
             ->first();
 
-        $this->codeTransaction = $lastTransaction->transaction_code;
+        // Check if $lastTransaction is null
+        $this->codeTransaction = $lastTransaction ? $lastTransaction->transaction_code : null;
+
         $this->bank = Bank::all();
         $this->carts = Cart::where('cashierId', Auth::id())->get();
         $this->vouchers = Discount::where('status', 1)->get();
+    }
+
+    public function addDiscount($cartId)
+    {
+        $this->showPaymentModal = false;
+        $this->showSuccessModal = false;
+        $this->showInvoiceModal = false;
+        $this->addCartModal = true;
+        $this->cartId = $cartId;
+
+        $cartItem = Cart::find($this->cartId);
+        $this->discount = $cartItem->discount;
+        $this->discount_type = $cartItem->discount_type;
+        $this->qty = $cartItem->qty;
+        $this->noted = $cartItem->noted;
+    }
+
+    public function discountEdit($cartId)
+    {
+        $cart = Cart::find($cartId);
+
+        $product = Product::find($cart->productId);
+
+        if (!$product) {
+            session()->flash('error', 'Product not found.');
+            return;
+        }
+
+        // Validasi kuantitas
+        if ($this->qty > $product->qty) {
+            $this->addError('qty', 'Quantity exceeds available stock (' . $product->qty . ').');
+            return;
+        }
+
+        $cart->discount = $this->discount;
+        $cart->discount_type = $this->discount_type;
+        $cart->qty =  $this->qty;
+        $cart->noted =  $this->noted;
+        $cart->save();
+
+        $this->addCartModal = false;
+        $this->showPaymentModal = true;
+        $this->showSuccessModal = false;
+        $this->showInvoiceModal = false;
+        return redirect('pos');
     }
 
     public function saveTransaction()
@@ -108,23 +185,33 @@ class FormPayment extends Component
             // Total harga akhir
             $totalPrice = $totalAmountCart - $transactionDiscount;
 
-
-            // Ambil tanggal hari ini dalam format YYMMDD
-            $today = now()->format('ymd');
-
             // Ambil nomor urut terakhir untuk tanggal hari ini
             $lastTransaction = \App\Models\SaleTransaction::whereDate('created_at', now()->toDateString())
                 ->orderBy('id', 'desc')
                 ->first();
 
-            // Tentukan nomor urut baru
-            $sequence = $lastTransaction ? intval(substr($lastTransaction->transaction_code, -4)) + 1 : 1;
 
-            // Format nomor urut menjadi 4 digit
-            $formattedSequence = str_pad($sequence, 4, '0', STR_PAD_LEFT);
+            if ($lastTransaction == null) {
+                // Format tanggal untuk kode transaksi
+                $today = now()->format('ymd');
 
-            // Buat kode transaksi
-            $transactionCode = $today . $formattedSequence;
+                // Buat kode transaksi baru untuk transaksi pertama hari ini
+                $formattedSequence = str_pad(1, 4, '0', STR_PAD_LEFT);
+                $transactionCode = $today . $formattedSequence;
+            } else {
+                // Ambil tanggal hari ini dalam format YYMMDD
+                $today = now()->format('ymd');
+
+
+                // Tentukan nomor urut baru
+                $sequence = $lastTransaction ? intval(substr($lastTransaction->transaction_code, -4)) + 1 : 1;
+
+                // Format nomor urut menjadi 4 digit
+                $formattedSequence = str_pad($sequence, 4, '0', STR_PAD_LEFT);
+
+                // Buat kode transaksi
+                $transactionCode = $today . $formattedSequence;
+            }
 
             if ($this->rekening === null) {
                 $payment_method = 'cash';
@@ -156,6 +243,13 @@ class FormPayment extends Component
 
             // Simpan ke tabel sale_items
             foreach ($cartItems as $item) {
+                $product = Product::find($item->productId);
+
+                if (!$product) {
+                    session()->flash('error', 'Product not found.');
+                    return redirect('pos');
+                }
+                
                 SaleItem::create([
                     'saleId' => $saleTransaction->id,
                     'productId' => $item->productId,
@@ -185,13 +279,14 @@ class FormPayment extends Component
             $this->codeTransaction = $saleTransaction->transaction_code;
             $this->showPaymentModal = false;
             $this->showSuccessModal = true;
+            $this->addCartModal = false;
+            $this->showInvoiceModal = false;
         } catch (\Exception $e) {
             // Tangani error dan tampilkan pesan
             session()->flash('error', 'Transaction failed: ' . $e->getMessage());
             return redirect('pos');
         }
     }
-
 
     public function nextOrder()
     {

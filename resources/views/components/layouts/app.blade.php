@@ -31,6 +31,8 @@
 
         @if (Request::is('pos'))
             @livewire('pos.pos')
+        @elseif (Request::is('hold'))
+            @livewire('pos.list-hold')
         @else
             @include('components.layouts.sidebar')
 

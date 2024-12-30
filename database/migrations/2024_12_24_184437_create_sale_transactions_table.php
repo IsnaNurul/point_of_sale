@@ -23,7 +23,7 @@ return new class extends Migration
             $table->string('rekening')->nullable();
             $table->string('payment_ammount')->nullable();
             $table->foreignId('discountId')->nullable()->constrained('discounts');
-            $table->foreignId('customerId')->nullable()->constrained('customers');
+            $table->foreignId('customerId')->nullable()->constrained('users');
             $table->foreignId('cashierId')->nullable()->constrained('users');
             $table->timestamps();
         });

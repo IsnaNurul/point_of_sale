@@ -19,6 +19,7 @@ return new class extends Migration
             $table->integer('price')->default(0);
             $table->integer('discount')->default(0)->nullable();
             $table->string('discount_type')->nullable();
+            $table->string('noted')->nullable();
             $table->timestamps();
         });
     }

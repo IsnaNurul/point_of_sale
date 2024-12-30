@@ -20,12 +20,25 @@ class Pos extends Component
     public $discountNominal = 0;
     public $totalCart = 0;
     public $transactionId = 0;
+    public $holdCount = 0;
 
     public function mount()
     {
-        $this->products = Product::all();
+        $this->clearCartIfNewDay();
+        $this->holdCount = SaleTransaction::where('status', 'hold')->get()->count();
+        $this->products = Product::where('qty', '>', 0)->get();
         $this->updateCarts();
     }
+
+    public function clearCartIfNewDay()
+    {
+        // Ambil tanggal sekarang
+        $today = now()->toDateString();
+
+        // Hapus item dari cart jika dibuat sebelum hari ini
+        \App\Models\Cart::whereDate('created_at', '<', $today)->delete();
+    }
+
 
     public function closeModal()
     {
@@ -66,12 +79,22 @@ class Pos extends Component
         $cart = Cart::find($cartId);
 
         if ($cart) {
-            $cart->increment('qty');
-            $cart->update(['price' => $cart->product->price * $cart->qty]);
-            $this->updateCarts();
-            $this->triggerEvent();
+            $product = Product::find($cart->productId);
+
+            // Periksa apakah kuantitas di keranjang sudah mencapai stok produk
+            if ($cart->qty >= $product->qty) {
+                session()->flash('error', 'Quantity has reached maximum stock for the product: ' . $product->name);
+                return redirect()->back();
+            } else {
+                $cart->increment('qty');
+                $cart->update(['price' => $product->price * $cart->qty]);
+                $this->updateCarts();
+                $this->triggerEvent();
+            }
+
         }
     }
+
 
     public function decreaseQty($cartId)
     {
@@ -121,15 +144,45 @@ class Pos extends Component
 
     public function updateCarts()
     {
+        $this->holdCount = SaleTransaction::where('status', 'hold')->get()->count();
         $this->carts = Cart::where('cashierId', Auth::id())->get();
         $this->cartsCount = Cart::where('cashierId', Auth::id())->get()->count();
         $this->productInCart = $this->carts->pluck('productId')->toArray();
         $this->subTotalCart = $this->carts->sum('price');
-        $this->totalDiscount = $this->carts->sum('discount');
+
+        $cartDiscounts = $this->carts->map(function ($item) {
+            if ($item->discount_type === 'percent') {
+                return intval(round(($item->discount / 100) * $item->price));
+            } elseif ($item->discount_type === 'fixed') {
+                return intval($item->discount);
+            }
+            return 0;
+        });
+        $this->totalDiscount = $cartDiscounts->sum();
         $this->totalCart = $this->subTotalCart - $this->totalDiscount;
-        $this->transactionId = SaleTransaction::whereDate('created_at', now()->toDateString())
+        $today = now()->format('ymd');
+
+        // Ambil transaksi terakhir untuk hari ini
+        $lastTransaction = SaleTransaction::whereDate('created_at', now()->toDateString())
             ->orderBy('id', 'desc')
             ->first();
+
+        if ($lastTransaction === null) {
+            // Tidak ada transaksi hari ini, mulai dari 0001
+            $formattedSequence = str_pad(1, 4, '0', STR_PAD_LEFT);
+        } else {
+            // Ambil nomor urut terakhir dan tambahkan 1
+            $sequence = intval(substr($lastTransaction->transaction_code, -4)) + 1;
+            $formattedSequence = str_pad($sequence, 4, '0', STR_PAD_LEFT);
+        }
+
+        // Buat kode transaksi baru
+        $transactionCode = $today . $formattedSequence;
+
+        // Simpan kode transaksi baru ke properti
+        $this->transactionId = (object) ['transaction_code' => $transactionCode];
+
+
 
         foreach ($this->carts as $cart) {
             if ($cart->discount > 0 && $cart->discount <= 100) {
@@ -163,14 +216,27 @@ class Pos extends Component
             ->orderBy('id', 'desc')
             ->first();
 
-        // Tentukan nomor urut baru
-        $sequence = $lastTransaction ? intval(substr($lastTransaction->transaction_code, -4)) + 1 : 1;
+        if ($lastTransaction == null) {
+            // Format tanggal untuk kode transaksi
+            $today = now()->format('ymd');
 
-        // Format nomor urut menjadi 4 digit
-        $formattedSequence = str_pad($sequence, 4, '0', STR_PAD_LEFT);
+            // Buat kode transaksi baru untuk transaksi pertama hari ini
+            $formattedSequence = str_pad(1, 4, '0', STR_PAD_LEFT);
+            $transactionCode = $today . $formattedSequence;
+        } else {
+            // Ambil tanggal hari ini dalam format YYMMDD
+            $today = now()->format('ymd');
 
-        // Buat kode transaksi
-        $transactionCode = $today . $formattedSequence;
+
+            // Tentukan nomor urut baru
+            $sequence = $lastTransaction ? intval(substr($lastTransaction->transaction_code, -4)) + 1 : 1;
+
+            // Format nomor urut menjadi 4 digit
+            $formattedSequence = str_pad($sequence, 4, '0', STR_PAD_LEFT);
+
+            // Buat kode transaksi
+            $transactionCode = $today . $formattedSequence;
+        }
 
         // Calculate totals
         $subTotal = $this->subTotalCart;

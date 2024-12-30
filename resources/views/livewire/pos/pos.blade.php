@@ -10,13 +10,13 @@
                     </div>
                 </div>
             @endif
-            <div class="col-md-12 col-lg-8">
+            <div class="col-md-12 col-lg-7">
                 <div class="btn-row d-sm-flex align-items-center">
-                    <a href="javascript:void(0);" class="btn btn-secondary mb-xs-3" data-bs-toggle="modal"
+                    <a href="{{ route('pos') }}" class="btn btn-secondary mb-xs-3" data-bs-toggle="modal"
                         data-bs-target="#orders"><span class="me-1 d-flex align-items-center"><i
-                                data-feather="shopping-cart" class="feather-16"></i></span>View Orders</a>
-                    <a href="javascript:void(0);" class="btn btn-info"><span class="me-1 d-flex align-items-center"><i
-                                data-feather="rotate-cw" class="feather-16"></i></span>Reset</a>
+                                data-feather="shopping-cart" class="feather-16"></i></span>POS</a>
+                    <a href="{{ route('hold') }}" class="btn btn-info"><span class="me-1 d-flex align-items-center"><i
+                                data-feather="rotate-cw" class="feather-16"></i></span>Hold ({{ $holdCount }})</a>
                     <a href="javascript:void(0);" class="btn btn-primary" data-bs-toggle="modal"
                         data-bs-target="#recents"><span class="me-1 d-flex align-items-center"><i
                                 data-feather="refresh-ccw" class="feather-16"></i></span>Transaction</a>
@@ -56,17 +56,15 @@
                     </div>
                 </div>
             </div>
-            <div class="col-md-12 col-lg-4 ps-0">
+            <div class="col-md-12 col-lg-5 ps-0">
                 <aside class="product-order-list">
                     <div class="head d-flex align-items-center justify-content-between w-100">
-                        <div class>
+                        <div class="">
                             <h5>Order List</h5>
                             <span>Transaction ID : #{{ $transactionId->transaction_code }}</span>
                         </div>
-                        <div class>
-                            <a class="confirm-text" href="javascript:void(0);"><i data-feather="user"
-                                    class="feather-20 text-secondary"></i></a>
-                            <a wire:click="clearCart"><i data-feather="trash-2" class="feather-20 text-danger"></i></a>
+                        <div>
+                            <span>{{ now()->format('d/m/Y') }}</span>
                         </div>
                     </div>
                     <div class="scroll-container2">
@@ -95,18 +93,25 @@
                                                     <p class="ms-3">
                                                         {{ number_format($cart->price, 0, ',', '.') }}</p>
                                                 </div>
-                                                @if ($cart->discount > 0)
-                                                    @if ($cart->discount > 0 && $cart->discount <= 100)
-                                                        <div class="d-flex justify-content-between">
-                                                            <p>Disc. ({{ $cart->discount }})</p>
-                                                            <p>- {{ $cart->discountNominal }}</p>
-                                                        </div>
-                                                    @else
+                                                <div class="d-flex justify-content-between">
+                                                    @if ($cart->discount > 0)
+                                                        @if ($cart->discount > 0 && $cart->discount <= 100)
+                                                            <div class="d-flex justify-content-between">
+                                                                <p>Disc. ({{ $cart->discount }})</p>
+                                                                <p>- {{ $cart->discountNominal }}</p>
+                                                            </div>
+                                                        @else
+                                                            <div>
+                                                                <p>Disc. ({{ $cart->discount }})</p>
+                                                            </div>
+                                                        @endif
+                                                    @endif
+                                                    @if ($cart->noted)
                                                         <div>
-                                                            <p>Disc. ({{ $cart->discount }})</p>
+                                                            <p>** {{ $cart->noted }}</p>
                                                         </div>
                                                     @endif
-                                                @endif
+                                                </div>
                                             </div>
                                         </div>
                                         <div class="qty-item text-center">
@@ -119,7 +124,7 @@
                                             <input type="text" class="form-control text-center" name="qty"
                                                 value="{{ $cart->qty }}" readonly />
                                             <a href="javascript:void(0);"
-                                                class="inc d-flex justify-content-center align-items-center"
+                                                class="inc d-flex justify-content-center align-items-center {{ $cart->qty >= $cart->product->qty ? 'disabled' : '' }}"
                                                 data-bs-toggle="tooltip" data-bs-placement="top" title="plus"
                                                 wire:click="increaseQty({{ $cart->id }})">
                                                 <i data-feather="plus-circle" class="feather-14"></i>
@@ -127,7 +132,8 @@
                                         </div>
                                         <div class="d-flex align-items-center action">
                                             <a class="btn-icon edit-icon me-2" data-bs-toggle="modal"
-                                                data-bs-target="#editDiscount{{ $cart->id }}">
+                                                data-bs-target="#category-modal"
+                                                onclick="addDiscount({{ $cart->id }})">
                                                 <i data-feather="edit" class="feather-14"></i>
                                             </a>
                                             <a class="btn-icon delete-icon"
@@ -171,13 +177,13 @@
                             <a href="javascript:void(0);" wire:click="clearCart"
                                 class="btn btn-danger btn-icon flex-fill"><span
                                     class="me-1 d-flex align-items-center"><i data-feather="trash-2"
-                                        class="feather-16"></i></span>Void</a>
+                                        class="feather-16"></i></span>Clear</a>
                         </div>
                     </div>
                 </aside>
             </div>
         </div>
-        <!-- Modal for Add/Edit Category -->
+        <!-- Modal form -->
         <div class="modal fade" id="category-modal" tabindex="-1" aria-labelledby="category-modal-label"
             data-bs-backdrop="static" aria-hidden="true" role="dialog">
             <div class="modal-dialog modal-dialog-centered custom-modal-two">
@@ -212,6 +218,18 @@
         const event = new CustomEvent('setTotalCart', {
             detail: {
                 totalCart: totalCart
+            },
+        });
+        window.dispatchEvent(event);
+    }
+
+    function addDiscount(cartId) {
+        console.log('Event will be dispatched with cartId: ', cartId);
+
+        // Dispatch event dengan ID kategori
+        const event = new CustomEvent('addDiscount', {
+            detail: {
+                cartId: cartId
             },
         });
         window.dispatchEvent(event);
