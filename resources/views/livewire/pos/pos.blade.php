@@ -34,7 +34,7 @@
                                             <div class="product-info default-cover card {{ in_array($product->id, $productInCart) ? 'active' : '' }}"
                                                 wire:click="addToCart({{ $product->id }})">
                                                 <a href="javascript:void(0);" class="img-bg">
-                                                    <img src="assets/img/products/pos-product-01.png" alt="Products" />
+                                                    <img src="{{ asset('storage/' . $product->image) }}" alt="Products" />
                                                     <span><i data-feather="check" class="feather-16"></i></span>
                                                 </a>
                                                 <h6 class="cat-name">
@@ -80,7 +80,7 @@
                                         <div class="d-flex align-items-center product-info" data-bs-toggle="modal"
                                             data-bs-target="#products">
                                             <a href="javascript:void(0);" class="img-bg">
-                                                <img src="assets/img/products/pos-product-16.png" alt="Products" />
+                                                <img src="{{ asset('storage/' . $cart->product->image) }}" alt="Products" />
                                             </a>
                                             <div class="info">
                                                 <span>{{ $cart->product->sku }}</span>
@@ -95,10 +95,10 @@
                                                 </div>
                                                 <div class="d-flex justify-content-between">
                                                     @if ($cart->discount > 0)
-                                                        @if ($cart->discount > 0 && $cart->discount <= 100)
+                                                        @if ($cart->discount_type == 'percent')
                                                             <div class="d-flex justify-content-between">
-                                                                <p>Disc. ({{ $cart->discount }})</p>
-                                                                <p>- {{ $cart->discountNominal }}</p>
+                                                                <p class="me-3">Disc. ({{ $cart->discount }})</p>
+                                                                <p class="me-3">- {{ $cart->discountNominal }}</p>
                                                             </div>
                                                         @else
                                                             <div>
@@ -154,7 +154,7 @@
                                     </tr>
                                     <tr>
                                         <td class="danger">Discount</td>
-                                        <td class="danger text-end">{{ $totalDiscount }}</td>
+                                        <td class="danger text-end">{{ number_format($totalDiscount, 0, ',', '.') }}</td>
                                     </tr>
                                     <tr style="border-top: 2px solid #797979;">
                                         <td>Total</td>

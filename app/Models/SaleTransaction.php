@@ -12,4 +12,9 @@ class SaleTransaction extends Model
     {
         return $this->belongsTo(User::class, 'cashierId');
     }
+
+    public function sale_item()
+    {
+        return $this->hasMany(SaleItem::class, 'id');
+    }
 }

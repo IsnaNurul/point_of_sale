@@ -50,6 +50,13 @@
                     </div>
                 </div>
             @endif
+            @if (session()->has('success'))
+                <div class="alert alert-solid-success alert-dismissible fade show" role="alert">
+                    {{ session('success') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"><i
+                            class="fas fa-xmark"></i></button>
+                </div>
+            @endif
             <div class="col-md-12 col-lg-12">
                 <div class="btn-row d-sm-flex align-items-center">
                     <a href="{{ route('pos') }}" class="btn btn-secondary mb-xs-3" data-bs-target="#orders"><span
@@ -57,7 +64,7 @@
                                 class="feather-16"></i></span>POS</a>
                     <a href="{{ route('hold') }}" class="btn btn-info"><span class="me-1 d-flex align-items-center"><i
                                 data-feather="rotate-cw" class="feather-16"></i></span>Hold ({{ $holdCount }})</a>
-                    <a href="javascript:void(0);" class="btn btn-primary" data-bs-target="#recents"><span
+                    <a href="{{ route('transaction') }}" class="btn btn-primary" data-bs-target="#recents"><span
                             class="me-1 d-flex align-items-center"><i data-feather="refresh-ccw"
                                 class="feather-16"></i></span>Transaction</a>
                 </div>
@@ -72,7 +79,7 @@
                                 <div class="col-sm-12 col-md-6 col-lg-4 col-xxl-4">
                                     <div class="order-body">
                                         <div class="default-cover p-4 mb-4">
-                                            <span class="badge bg-secondary d-inline-block mb-4">Order ID :
+                                            <span class="badge bg-secondary d-inline-block mb-4">Transaction ID :
                                                 #{{ $hold->transaction_code }}</span>
                                             <div class="row">
                                                 <div class="col-sm-12 col-md-6 record mb-3">
@@ -112,7 +119,8 @@
                                                 <a data-bs-toggle="modal" data-bs-target="#product-modal"
                                                     onclick="setProductModal({{ $hold->id }})"
                                                     class="btn btn-success btn-icon flex-fill">Products</a>
-                                                <a class="btn btn-danger btn-icon flex-fill">Cancel</a>
+                                                <a class="btn btn-danger btn-icon flex-fill"
+                                                    onclick="setCancel({{ $hold->id }})">Cancel</a>
                                             </div>
                                         </div>
                                     </div>
@@ -164,6 +172,18 @@
 
         // Dispatch event dengan ID kategori
         const event = new CustomEvent('setProductModal', {
+            detail: {
+                SaleId: SaleId
+            },
+        });
+        window.dispatchEvent(event);
+    }
+
+    function setCancel(SaleId) {
+        console.log('Event will be dispatched with categoryId: ', SaleId);
+
+        // Dispatch event dengan ID kategori
+        const event = new CustomEvent('setCancel', {
             detail: {
                 SaleId: SaleId
             },

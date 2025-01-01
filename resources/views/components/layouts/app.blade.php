@@ -33,6 +33,8 @@
             @livewire('pos.pos')
         @elseif (Request::is('hold'))
             @livewire('pos.list-hold')
+        @elseif (Request::is('transaction'))
+            @livewire('pos.list-transaction')
         @else
             @include('components.layouts.sidebar')
 

@@ -17,7 +17,7 @@ class FormPayment extends Component
     public $codeTransaction = null;
     public $bank;
     public $discount;
-    public $discount_type;
+    public $discount_type = 'percent';
     public $rekening;
     public $carts;
     public $payment_method;
@@ -100,7 +100,7 @@ class FormPayment extends Component
 
         $cartItem = Cart::find($this->cartId);
         $this->discount = $cartItem->discount;
-        $this->discount_type = $cartItem->discount_type;
+        $this->discount_type = $cartItem->discount_type ? 'fixed' : 'percent';
         $this->qty = $cartItem->qty;
         $this->noted = $cartItem->noted;
     }

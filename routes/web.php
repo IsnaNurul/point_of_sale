@@ -4,6 +4,7 @@ use App\Http\Controllers\AuthController;
 use App\Livewire\Category\ListCategory;
 use App\Livewire\Dashboard;
 use App\Livewire\Pos\ListHold;
+use App\Livewire\Pos\ListTransaction;
 use App\Livewire\Pos\Pos;
 use App\Livewire\Products\FormProducts;
 use App\Livewire\Products\ListProducts;
@@ -24,6 +25,7 @@ Route::middleware('AuthCheck')->group(function () {
     Route::get('/units', ListUnits::class)->name('units');
     Route::get('/pos', Pos::class)->name('pos');
     Route::get('/hold', ListHold::class)->name('hold');
+    Route::get('/transaction', ListTransaction::class)->name('transaction');
     Route::get('/logout', [AuthController::class, 'logot'])->name('logout');
 
 });

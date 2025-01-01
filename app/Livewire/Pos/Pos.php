@@ -185,7 +185,7 @@ class Pos extends Component
 
 
         foreach ($this->carts as $cart) {
-            if ($cart->discount > 0 && $cart->discount <= 100) {
+            if ($cart->discount_type === 'percent') {
                 $cart->discountNominal = round($cart->price * ($cart->discount / 100));
             } else {
                 $cart->discountNominal = $cart->discount;

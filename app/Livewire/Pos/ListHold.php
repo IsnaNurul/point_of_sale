@@ -9,6 +9,9 @@ class ListHold extends Component
 {
     public $holdCount = 0;
     public $holds;
+    public $transaction;
+
+    protected $listeners = ['setCancel'];
 
     public function mount()
     {
@@ -18,28 +21,24 @@ class ListHold extends Component
         $this->updateData();
     }
 
-    // public function test()
-    // {
-    //     dd('test');
-    // }
 
-    public function cancelTransaction($transactionId)
+    public function setCancel($SaleId)
     {
-        dd($transactionId);
-        $transaction = SaleTransaction::find($transactionId);
+        $transaction = SaleTransaction::find($SaleId);
 
         if ($transaction) {
-            $transaction->status = 'canceled'; // Change the status
-            $transaction->save(); // Save the updated record
+            $transaction->status = 'canceled'; // Ubah status
+            $transaction->save(); // Simpan perubahan
 
-            $this->holdCount = $this->holds->count();
-
-            $this->updateData();
-            // You can also add a success message or event here if needed
-            session()->flash('message', 'Transaction canceled successfully.');
-            return;
+            $this->updateData(); // Perbarui data
+            session()->flash('success', 'Transaction successfully canceled!');
+            return redirect('hold');
+        } else {
+            session()->flash('error', 'Transaction not found!');
+            return redirect('hold');
         }
     }
+
 
 
     public function updateData()
