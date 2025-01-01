@@ -9,6 +9,20 @@ use Illuminate\Notifications\Notifiable;
 
 class User extends Authenticatable
 {
+    public function customer()
+    {
+        return $this->hasOne(Customer::class, 'userId');
+    }
+
+    public function supplier()
+    {
+        return $this->hasOne(Supplier::class, 'userId');
+    }
+
+    public function purchases()
+    {
+        return $this->hasMany(Purchases::class, 'userId');
+    }
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable;
 
@@ -17,12 +31,7 @@ class User extends Authenticatable
      *
      * @var array<int, string>
      */
-    protected $fillable = [
-        'name',
-        'username',
-        'password',
-        'role'
-    ];
+    protected $guarded = '';
 
     /**
      * The attributes that should be hidden for serialization.

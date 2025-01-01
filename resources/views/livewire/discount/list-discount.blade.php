@@ -3,8 +3,8 @@
         <div class="page-header">
             <div class="add-item d-flex">
                 <div class="page-title">
-                    <h4>Product List</h4>
-                    <h6>Manage your products</h6>
+                    <h4>Discount List</h4>
+                    <h6>Manage your discount</h6>
                 </div>
             </div>
             <ul class="table-top-head">
@@ -30,8 +30,8 @@
                 </li>
             </ul>
             <div class="page-btn">
-                <a href="#" class="btn btn-added" data-bs-toggle="modal" data-bs-target="#category-modal">
-                    <i data-feather="plus-circle" class="me-2"></i>Add New Category</a>
+                <a href="#" class="btn btn-added" data-bs-toggle="modal" data-bs-target="#discount-modal">
+                    <i data-feather="plus-circle" class="me-2"></i>Add New Discount</a>
             </div>
         </div>
 
@@ -61,21 +61,26 @@
                     <table class="table" id="example">
                         <thead>
                             <tr>
-                                {{--  <th class="no-sort text">
+                                {{--  <th class="no-sort">
                                     <label class="checkboxs">
                                         <input type="checkbox" id="select-all" />
                                         <span class="checkmarks"></span>
                                     </label>
                                 </th>  --}}
                                 <th class="text-start">No</th>
-                                <th>Category</th>
-                                <th>Created On</th>
+                                <th>Name</th>
+                                <th>Code</th>
+                                <th>Type</th>
+                                <th>Value</th>
+                                <th>Start At</th>
+                                <th>End At</th>
+                                <th>Limit</th>
                                 <th>Status</th>
                                 <th class="no-sort">Action</th>
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach ($categories as $category)
+                            @foreach ($discounts as $discount)
                                 <tr>
                                     {{--  <td>
                                         <label class="checkboxs">
@@ -84,24 +89,30 @@
                                         </label>
                                     </td>  --}}
                                     <td class="text-start">{{ $loop->iteration }}</td>
-                                    <td>{{ $category->category }}</td>
-                                    <td>{{ \Carbon\Carbon::parse($category->created_at)->locale('id')->isoFormat('D MMMM YYYY') ?? '' }}
+                                    <td>{{ $discount->name }}</td>
+                                    <td>{{ $discount->code }}</td>
+                                    <td>{{ $discount->type === 'percent' ? 'Percent' : 'Fixed' }}</td>
+                                    <td>{{ $discount->value }}</td>
+                                    <td>{{ \Carbon\Carbon::parse($discount->start_at)->locale('id')->isoFormat('D MMMM YYYY HH:mm') ?? '' }}
                                     </td>
+                                    <td>{{ \Carbon\Carbon::parse($discount->end_at)->locale('id')->isoFormat('D MMMM YYYY HH:mm') ?? '' }}
+                                    </td>
+                                    <td>{{ $discount->limit }} Transaction</td>
                                     <td>
                                         <span
-                                            class="badge {{ $category->status === 'Active' ? 'badge-linesuccess' : 'badge-linedanger' }}">
-                                            {{ $category->status }}
+                                            class="badge {{ $discount->status == 1 ? 'badge-linesuccess' : 'badge-linedanger' }}">
+                                            {{ $discount->status == 1 ? 'Active' : 'Inactive' }}
                                         </span>
                                     </td>
                                     <td class="action-table-data">
                                         <div class="edit-delete-action">
                                             <a class="me-2 p-2" href="javascript:void(0);" data-bs-toggle="modal"
-                                                data-bs-target="#category-modal"
-                                                onclick="setCategoryData({{ $category->id }})">
+                                                data-bs-target="#discount-modal"
+                                                onclick="setDiscountData({{ $discount->id }})">
                                                 <i data-feather="edit" class="feather-edit"></i>
                                             </a>
                                             <a class="confirm-text p-2"
-                                                wire:click="deleteCategory({{ $category->id }})">
+                                                wire:click="deleteDiscount({{ $discount->id }})">
                                                 <i data-feather="trash-2" class="feather-trash-2"></i>
                                             </a>
                                         </div>
@@ -115,48 +126,49 @@
         </div>
     </div>
 
-    <!-- Modal for Add/Edit Category -->
-    <div class="modal fade" id="category-modal" tabindex="-1" aria-labelledby="category-modal-label"
+    <!-- Modal for Add/Edit Discount -->
+    <div class="modal fade" id="discount-modal" tabindex="-1" aria-labelledby="discount-modal-label"
         aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered custom-modal-two">
+        <div class="modal-dialog modal-lg modal-dialog-centered custom-modal-two">
             <div class="modal-content">
                 <div class="page-wrapper-new p-0">
                     <div class="content">
                         <div class="modal-header border-0 custom-modal-header">
                             <div class="page-title">
-                                <h4 id="modal-title">Create Category</h4>
+                                <h4 id="modal-title">Create Discount</h4>
                             </div>
                             <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
                                 <span aria-hidden="true">&times;</span>
                             </button>
                         </div>
                         <div class="modal-body custom-modal-body">
-                            <livewire:category.form-category />
+                            <livewire:discount.form-discount />
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+
 </div>
 <script>
     function showCreateModal() {
         console.log('Opening create modal');
-        document.getElementById('modal-title').innerText = 'Create Category';
+        document.getElementById('modal-title').innerText = 'Create Discount';
 
         // Dispatch event untuk reset form
         const resetEvent = new CustomEvent('resetForm');
         window.dispatchEvent(resetEvent);
     }
 
-    function setCategoryData(categoryId) {
-        console.log('Event will be dispatched with categoryId: ', categoryId);
-        document.getElementById('modal-title').innerText = 'Edit Category';
+    function setDiscountData(discountId) {
+        console.log('Event will be dispatched with discountId: ', discountId);
+        document.getElementById('modal-title').innerText = 'Edit Discount';
 
         // Dispatch event dengan ID kategori
-        const event = new CustomEvent('setCategoryData', {
+        const event = new CustomEvent('setDiscountData', {
             detail: {
-                categoryId: categoryId
+                discountId: discountId
             },
         });
         window.dispatchEvent(event);

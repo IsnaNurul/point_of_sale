@@ -58,15 +58,16 @@
                 </div>
 
                 <div class="table-responsive product-list">
-                    <table class="table">
+                    <table class="table" id="example">
                         <thead>
                             <tr>
-                                <th class="no-sort">
+                                {{--  <th class="no-sort">
                                     <label class="checkboxs">
                                         <input type="checkbox" id="select-all" />
                                         <span class="checkmarks"></span>
                                     </label>
-                                </th>
+                                </th>  --}}
+                                <th class="text-start">No</th>
                                 <th>Unit</th>
                                 <th>Short Name</th>
                                 <th>Created On</th>
@@ -77,12 +78,13 @@
                         <tbody>
                             @foreach ($units as $unit)
                                 <tr>
-                                    <td>
+                                    {{--  <td>
                                         <label class="checkboxs">
                                             <input type="checkbox" />
                                             <span class="checkmarks"></span>
                                         </label>
-                                    </td>
+                                    </td>  --}}
+                                    <td class="text-start">{{ $loop->iteration }}</td>
                                     <td>{{ $unit->name }}</td>
                                     <td>{{ $unit->short_name }}</td>
                                     <td>{{ $unit->created_at ? $$unit->created_at->format('d M Y') : '' }}</td>
