@@ -93,7 +93,8 @@
                                             <div class="col-lg-4 col-sm-6 col-12">
                                                 <div class="input-blocks add-product">
                                                     <label>Quantity</label>
-                                                    <input type="number" wire:model="qty" class="form-control">
+                                                    <input type="number" wire:model="qty" class="form-control"
+                                                        {{ $productId ? 'readonly' : '' }}>
                                                     @error('qty')
                                                         <span class="text-danger">{{ $message }}</span>
                                                     @enderror

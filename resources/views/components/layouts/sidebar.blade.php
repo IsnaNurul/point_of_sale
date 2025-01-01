@@ -39,16 +39,18 @@
                 <li class="submenu-open">
                     <h6 class="submenu-hdr">Promo</h6>
                     <ul>
-                        <li>
-                            <a href="coupons.html"><i data-feather="shopping-cart"></i><span>Discount</span></a>
+                        <li class="{{ Request::is('discount*') ? 'active' : '' }}">
+                            <a href="{{ route('discount') }}"><i
+                                    data-feather="shopping-cart"></i><span>Discount</span></a>
                         </li>
                     </ul>
                 </li>
                 <li class="submenu-open">
                     <h6 class="submenu-hdr">Purchases</h6>
                     <ul>
-                        <li>
-                            <a href="purchase-list.html"><i data-feather="shopping-bag"></i><span>Purchases</span></a>
+                        <li class="{{ Request::is('purchases*') ? 'active' : '' }}">
+                            <a href="{{ route('purchases') }}"><i
+                                    data-feather="shopping-bag"></i><span>Purchases</span></a>
                         </li>
                     </ul>
                 </li>
@@ -75,11 +77,11 @@
                         <li>
                             <a href="users.html"><i data-feather="user-check"></i><span>Cashier</span></a>
                         </li>
-                        <li>
-                            <a href="customers.html"><i data-feather="user"></i><span>Customers</span></a>
+                        <li class="{{ Request::is('customers*') ? 'active' : '' }}">
+                            <a href="{{ route('customers') }}"><i data-feather="user"></i><span>Customers</span></a>
                         </li>
-                        <li>
-                            <a href="suppliers.html"><i data-feather="users"></i><span>Suppliers</span></a>
+                        <li class="{{ Request::is('suppliers*') ? 'active' : '' }}">
+                            <a href="{{ route('suppliers') }}"><i data-feather="users"></i><span>Suppliers</span></a>
                         </li>
                         <li>
                             <a href="delete-account.html"><i data-feather="lock"></i><span>Delete Account

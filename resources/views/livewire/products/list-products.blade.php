@@ -58,15 +58,16 @@
             </div>
 
             <div class="table-responsive product-list">
-                <table class="table">
+                <table class="table" id="example">
                     <thead>
                         <tr>
-                            <th class="no-sort">
+                            {{--  <th class="no-sort">
                                 <label class="checkboxs">
                                     <input type="checkbox" id="select-all" />
                                     <span class="checkmarks"></span>
                                 </label>
-                            </th>
+                            </th>  --}}
+                            <th class="text-start">No</th>
                             <th>Product</th>
                             <th>SKU</th>
                             <th>Category</th>
@@ -81,12 +82,13 @@
                         @if (isset($products) && $products->isNotEmpty())
                             @foreach ($products as $product)
                                 <tr>
-                                    <td>
+                                    {{--  <td>
                                         <label class="checkboxs">
                                             <input type="checkbox" />
                                             <span class="checkmarks"></span>
                                         </label>
-                                    </td>
+                                    </td>  --}}
+                                    <td class="text-start">{{ $loop->iteration }}</td>
                                     <td>
                                         <div class="productimgname">
                                             @if ($product->image)
@@ -111,9 +113,6 @@
                                     </td>
                                     <td class="action-table-data">
                                         <div class="edit-delete-action">
-                                            <a class="me-2 edit-icon p-2" href="product-details.html">
-                                                <i data-feather="eye" class="feather-eye"></i>
-                                            </a>
                                             <a class="me-2 p-2" href="{{ route('products.form', $product->id) }}">
                                                 <i data-feather="edit" class="feather-edit"></i>
                                             </a>

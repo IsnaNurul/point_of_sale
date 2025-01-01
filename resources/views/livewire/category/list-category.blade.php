@@ -58,15 +58,16 @@
                 </div>
 
                 <div class="table-responsive product-list">
-                    <table class="table">
+                    <table class="table" id="example">
                         <thead>
                             <tr>
-                                <th class="no-sort">
+                                {{--  <th class="no-sort text">
                                     <label class="checkboxs">
                                         <input type="checkbox" id="select-all" />
                                         <span class="checkmarks"></span>
                                     </label>
-                                </th>
+                                </th>  --}}
+                                <th class="text-start">No</th>
                                 <th>Category</th>
                                 <th>Created On</th>
                                 <th>Status</th>
@@ -76,12 +77,13 @@
                         <tbody>
                             @foreach ($categories as $category)
                                 <tr>
-                                    <td>
+                                    {{--  <td>
                                         <label class="checkboxs">
                                             <input type="checkbox" />
                                             <span class="checkmarks"></span>
                                         </label>
-                                    </td>
+                                    </td>  --}}
+                                    <td class="text-start">{{ $loop->iteration }}</td>
                                     <td>{{ $category->category }}</td>
                                     <td>{{ \Carbon\Carbon::parse($category->created_at)->locale('id')->isoFormat('D MMMM YYYY') ?? '' }}
                                     </td>
