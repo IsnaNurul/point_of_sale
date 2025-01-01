@@ -1,7 +1,26 @@
 <div class="page-wrapper pos-pg-wrapper ms-0">
     <div class="content pos-design p-0">
         <div class="row align-items-start pos-wrapper">
+            @if (session()->has('error'))
+                <div class="p-3">
+                    <div class="alert alert-solid-danger alert-dismissible fade show" role="alert">
+                        {{ session('error') }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"><i
+                                class="fas fa-xmark"></i></button>
+                    </div>
+                </div>
+            @endif
             <div class="col-md-12 col-lg-8">
+                <div class="btn-row d-sm-flex align-items-center">
+                    <a href="javascript:void(0);" class="btn btn-secondary mb-xs-3" data-bs-toggle="modal"
+                        data-bs-target="#orders"><span class="me-1 d-flex align-items-center"><i
+                                data-feather="shopping-cart" class="feather-16"></i></span>View Orders</a>
+                    <a href="javascript:void(0);" class="btn btn-info"><span class="me-1 d-flex align-items-center"><i
+                                data-feather="rotate-cw" class="feather-16"></i></span>Reset</a>
+                    <a href="javascript:void(0);" class="btn btn-primary" data-bs-toggle="modal"
+                        data-bs-target="#recents"><span class="me-1 d-flex align-items-center"><i
+                                data-feather="refresh-ccw" class="feather-16"></i></span>Transaction</a>
+                </div>
                 <div class="pos-categories tabs_wrapper">
                     <div class="pos-products">
                         <div class="d-flex align-items-center justify-content-between">
@@ -42,7 +61,7 @@
                     <div class="head d-flex align-items-center justify-content-between w-100">
                         <div class>
                             <h5>Order List</h5>
-                            <span>Transaction ID : #65565</span>
+                            <span>Transaction ID : #{{ $transactionId->transaction_code }}</span>
                         </div>
                         <div class>
                             <a class="confirm-text" href="javascript:void(0);"><i data-feather="user"
@@ -70,12 +89,24 @@
                                                 <h6>
                                                     <a href="javascript:void(0);">{{ $cart->product->name ?? '' }}</a>
                                                 </h6>
-                                                <div class="d-flex justify-content-between">
-                                                    <p>Rp. {{ number_format($cart->product->price, 0, ',', '.') }}</p>
+                                                <div class="d-flex justify-content-between mb-0">
+                                                    <p> {{ number_format($cart->product->price, 0, ',', '.') }}</p>
                                                     <p class="ms-3">x {{ $cart->qty }}</p>
-                                                    <p class="ms-3">Rp.
+                                                    <p class="ms-3">
                                                         {{ number_format($cart->price, 0, ',', '.') }}</p>
                                                 </div>
+                                                @if ($cart->discount > 0)
+                                                    @if ($cart->discount > 0 && $cart->discount <= 100)
+                                                        <div class="d-flex justify-content-between">
+                                                            <p>Disc. ({{ $cart->discount }})</p>
+                                                            <p>- {{ $cart->discountNominal }}</p>
+                                                        </div>
+                                                    @else
+                                                        <div>
+                                                            <p>Disc. ({{ $cart->discount }})</p>
+                                                        </div>
+                                                    @endif
+                                                @endif
                                             </div>
                                         </div>
                                         <div class="qty-item text-center">
@@ -94,11 +125,9 @@
                                                 <i data-feather="plus-circle" class="feather-14"></i>
                                             </a>
                                         </div>
-
                                         <div class="d-flex align-items-center action">
                                             <a class="btn-icon edit-icon me-2" data-bs-toggle="modal"
-                                                data-bs-target="editDiscountModal"
-                                                wire:click="discountEdit({{ $cart }})">
+                                                data-bs-target="#editDiscount{{ $cart->id }}">
                                                 <i data-feather="edit" class="feather-14"></i>
                                             </a>
                                             <a class="btn-icon delete-icon"
@@ -118,64 +147,87 @@
                                         <td class="text-end">Rp. {{ number_format($subTotalCart, 0, ',', '.') }}</td>
                                     </tr>
                                     <tr>
-                                        <td class="danger">Discount (10%)</td>
-                                        <td class="danger text-end">$15.21</td>
+                                        <td class="danger">Discount</td>
+                                        <td class="danger text-end">{{ $totalDiscount }}</td>
                                     </tr>
                                     <tr style="border-top: 2px solid #797979;">
                                         <td>Total</td>
-                                        <td class="text-end">$64,024.5</td>
+                                        <td class="text-end">Rp. {{ number_format($totalCart, 0, ',', '.') }}</td>
                                     </tr>
                                 </table>
                             </div>
                         </div>
                         <div class="d-grid btn-block">
-                            <a class="btn btn-secondary" href="javascript:void(0);">
-                                Grand Total : $64,024.5
+                            <a class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#category-modal"
+                                onclick="setTotalCart({{ $totalCart }})">
+                                <p style="font-size: 20px">Rp. {{ number_format($totalCart, 0, ',', '.') }}</p>
                             </a>
                         </div>
                         <div class="btn-row d-sm-flex align-items-center justify-content-between">
-                            <a href="javascript:void(0);" class="btn btn-info btn-icon flex-fill"
-                                data-bs-toggle="modal" data-bs-target="#hold-order"><span
-                                    class="me-1 d-flex align-items-center"><i data-feather="pause"
-                                        class="feather-16"></i></span>Hold</a>
-                            <a href="javascript:void(0);" class="btn btn-danger btn-icon flex-fill"><span
+                            <a href="javascript:void(0);" wire:click="holdOrder"
+                                class="btn btn-info btn-icon flex-fill" data-bs-toggle="modal"
+                                data-bs-target="#hold-order"><span class="me-1 d-flex align-items-center"><i
+                                        data-feather="pause" class="feather-16"></i></span>Hold</a>
+                            <a href="javascript:void(0);" wire:click="clearCart"
+                                class="btn btn-danger btn-icon flex-fill"><span
                                     class="me-1 d-flex align-items-center"><i data-feather="trash-2"
                                         class="feather-16"></i></span>Void</a>
-                            <a href="javascript:void(0);" class="btn btn-success btn-icon flex-fill"
-                                data-bs-toggle="modal" data-bs-target="#payment-completed"><span
-                                    class="me-1 d-flex align-items-center"><i data-feather="credit-card"
-                                        class="feather-16"></i></span>Payment</a>
                         </div>
                     </div>
                 </aside>
             </div>
         </div>
-    </div>
-    <div class="modal fade" id="editDiscountModal" tabindex="-1" aria-labelledby="editDiscountModalLabel"
-        aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="editProductModalLabel">Edit Product</h5>
-                    <button type="button" class="btn-close" wire:click="closeModal"></button>
-                </div>
-                <div class="modal-body">
-                    </>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" wire:click="closeModal">Close</button>
-                    <button type="submit" class="btn btn-primary" wire:click.prevent="discountUpdate">Save
-                        Changes</button>
+        <!-- Modal for Add/Edit Category -->
+        <div class="modal fade" id="category-modal" tabindex="-1" aria-labelledby="category-modal-label"
+            data-bs-backdrop="static" aria-hidden="true" role="dialog">
+            <div class="modal-dialog modal-dialog-centered custom-modal-two">
+                <div class="modal-content">
+                    <div class="page-wrapper-new p-0">
+                        <div class="content">
+                            <div class="modal-body custom-modal-body">
+                                <livewire:pos.form-payment />
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-
 </div>
 
 <script>
-    Livewire.on('show-modal', () => {
-        console.log('Opening modal...');
-        $('#editDiscountModal').modal('show'); // This triggers the Bootstrap modal
+    function showCreateModal() {
+        console.log('Opening create modal');
+        document.getElementById('modal-title').innerText = 'Create Category';
+
+        // Dispatch event untuk reset form
+        const resetEvent = new CustomEvent('resetForm');
+        window.dispatchEvent(resetEvent);
+    }
+
+    function setTotalCart(totalCart) {
+        console.log('Event will be dispatched with categoryId: ', totalCart);
+
+        // Dispatch event dengan ID kategori
+        const event = new CustomEvent('setTotalCart', {
+            detail: {
+                totalCart: totalCart
+            },
+        });
+        window.dispatchEvent(event);
+    }
+</script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const modal = document.getElementById('category-modal');
+
+        modal.addEventListener('hidden.bs.modal', () => {
+            console.log('Modal closed, resetting data...');
+
+            // Dispatch event untuk reset data di modal
+            const resetEvent = new CustomEvent('resetForm');
+            window.dispatchEvent(resetEvent);
+        });
     });
 </script>

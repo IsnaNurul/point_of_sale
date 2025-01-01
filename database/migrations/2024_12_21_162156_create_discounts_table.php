@@ -18,8 +18,8 @@ return new class extends Migration
             $table->string('type');
             $table->text('description')->nullable();
             $table->integer('value')->default(0);
-            $table->datetime('start_at')->nullable();
-            $table->datetime('end_at')->nullable();
+            $table->timestamp('start_at')->nullable();
+            $table->timestamp('end_at')->nullable();
             $table->integer('limit')->default(0);
             $table->boolean('status')->default(false);
             $table->timestamps();

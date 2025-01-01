@@ -18,10 +18,13 @@ return new class extends Migration
             $table->integer('total_price')->default(0);
             $table->integer('sub_total')->default(0);
             $table->integer('discount')->default(0)->nullable();
-            $table->string('status')->default('');
-            $table->foreignId('discountId')->nullable()->constrained('discounts')->cascadeOnDelete()->cascadeOnUpdate();
-            $table->foreignId('customerId')->nullable()->constrained('customers')->cascadeOnDelete()->cascadeOnUpdate();
-            $table->foreignId('cashierId')->nullable()->constrained('cashiers')->cascadeOnDelete()->cascadeOnUpdate();
+            $table->string('status')->default('success');
+            $table->string('payment_method')->nullable();
+            $table->string('rekening')->nullable();
+            $table->string('payment_ammount')->nullable();
+            $table->foreignId('discountId')->nullable()->constrained('discounts');
+            $table->foreignId('customerId')->nullable()->constrained('customers');
+            $table->foreignId('cashierId')->nullable()->constrained('users');
             $table->timestamps();
         });
     }
