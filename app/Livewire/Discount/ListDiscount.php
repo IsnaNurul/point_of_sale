@@ -14,29 +14,7 @@ class ListDiscount extends Component
     public function mount()
     {
         $this->discounts = Discount::all();
-        $this->checkAndUpdateDiscountStatus();
-    }
-    public function checkAndUpdateDiscountStatus()
-    {
-        $now = now()->timezone('Asia/Jakarta');
-        foreach ($this->discounts as $discount) {
-            $startAt = Carbon::parse($discount->start_at);
-            $endAt = Carbon::parse($discount->end_at);
-            if ($now->gte($startAt) && $now->lte($endAt)) {
-                $discount->status = 1;
-            } else {
-                $discount->status = 0;
-            }
-
-            // cek apakah jam sekarang sudah melebihi jam end_at
-            if ($now->format('H:i:s') > $endAt->format('H:i:s')) {
-                $discount->status = 0;
-            }
-            // dd($now->format('H:i:s'), $endAt->format('H:i:s'));
-
-            $discount->save();
-        }
-        $this->refreshDiscount();
+        // $this->checkAndUpdateDiscountStatus();
     }
 
 
@@ -61,12 +39,37 @@ class ListDiscount extends Component
         }
     }
 
-
-
     private function refreshDiscount()
     {
         $this->discounts = Discount::all();
     }
+
+    public function toggleStatus($id)
+    {
+        try {
+
+            $discount = Discount::findOrFail($id);
+
+            $now = now()->timezone('Asia/Jakarta');
+            $endAt = Carbon::parse($discount->end_at);
+
+            if ($endAt->lt($now)) {
+                session()->flash('error', 'This voucher has expired and cannot be activated.');
+                return;
+            }
+            // Ubah status
+            $discount->status = $discount->status == 1 ? 0 : 1;
+            $discount->save();
+
+            // Refresh data diskon
+            $this->refreshDiscount();
+
+            session()->flash('success', 'Discount status updated successfully!');
+        } catch (\Exception $e) {
+            session()->flash('error', 'Failed to update discount status.');
+        }
+    }
+
 
     private function handleQueryException(QueryException $e)
     {

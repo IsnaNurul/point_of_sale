@@ -93,8 +93,7 @@
                                             <div class="col-lg-4 col-sm-6 col-12">
                                                 <div class="input-blocks add-product">
                                                     <label>Quantity</label>
-                                                    <input type="number" wire:model="qty" class="form-control"
-                                                        {{ $productId ? 'readonly' : '' }}>
+                                                    <input type="number" wire:model="qty" class="form-control">
                                                     @error('qty')
                                                         <span class="text-danger">{{ $message }}</span>
                                                     @enderror
@@ -109,7 +108,8 @@
                                                     <select wire:model="unitId" class="form-select">
                                                         <option value="">Choose</option>
                                                         @foreach ($units as $unit)
-                                                            <option value="{{ $unit->id }}">{{ $unit->name }}
+                                                            <option value="{{ $unit->id }}">
+                                                                {{ $unit->short_name }}
                                                             </option>
                                                         @endforeach
                                                     </select>
@@ -121,17 +121,28 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="col-lg-4 col-sm-6 col-12">
-                                    <div class="input-blocks add-product">
-                                        <label>Status</label>
-                                        <select class="form-select" wire:model="status">
-                                            <option value="" selected>Choose</option>
-                                            <option value=1>Active</option>
-                                            <option value=0>InActive</option>
-                                        </select>
-                                        @error('status')
-                                            <span class="text-danger">{{ $message }}</span>
-                                        @enderror
+                                <div class="row">
+                                    <div class="col-lg-4 col-sm-6 col-12">
+                                        <div class="mb-3 add-product">
+                                            <label class="form-label">Expiration Date</label>
+                                            <input type="date" wire:model="expired" class="form-control">
+                                            @error('expired')
+                                                <span class="text-danger">{{ $message }}</span>
+                                            @enderror
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-4 col-sm-6 col-12">
+                                        <div class="input-blocks add-product">
+                                            <label>Status</label>
+                                            <select class="form-select" wire:model="status">
+                                                <option value="" selected>Choose</option>
+                                                <option value=1>Active</option>
+                                                <option value=0>InActive</option>
+                                            </select>
+                                            @error('status')
+                                                <span class="text-danger">{{ $message }}</span>
+                                            @enderror
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="col-lg-12">

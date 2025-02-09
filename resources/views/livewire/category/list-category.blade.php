@@ -9,22 +9,6 @@
             </div>
             <ul class="table-top-head">
                 <li>
-                    <a data-bs-toggle="tooltip" data-bs-placement="top" title="Pdf"><img src="assets/img/icons/pdf.svg"
-                            alt="img" /></a>
-                </li>
-                <li>
-                    <a data-bs-toggle="tooltip" data-bs-placement="top" title="Excel"><img
-                            src="assets/img/icons/excel.svg" alt="img" /></a>
-                </li>
-                <li>
-                    <a data-bs-toggle="tooltip" data-bs-placement="top" title="Print"><i data-feather="printer"
-                            class="feather-rotate-ccw"></i></a>
-                </li>
-                <li>
-                    <a data-bs-toggle="tooltip" data-bs-placement="top" title="Refresh"><i data-feather="rotate-ccw"
-                            class="feather-rotate-ccw"></i></a>
-                </li>
-                <li>
                     <a data-bs-toggle="tooltip" data-bs-placement="top" title="Collapse" id="collapse-header"><i
                             data-feather="chevron-up" class="feather-chevron-up"></i></a>
                 </li>
@@ -100,8 +84,8 @@
                                                 onclick="setCategoryData({{ $category->id }})">
                                                 <i data-feather="edit" class="feather-edit"></i>
                                             </a>
-                                            <a class="confirm-text p-2"
-                                                wire:click="deleteCategory({{ $category->id }})">
+                                            <a class="p-2" href="javascript:void(0);"
+                                                onclick="confirmDelete({{ $category->id }})">
                                                 <i data-feather="trash-2" class="feather-trash-2"></i>
                                             </a>
                                         </div>
@@ -139,6 +123,23 @@
         </div>
     </div>
 </div>
+<script>
+    function confirmDelete(categoryId) {
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "You won't be able to revert this!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#fd7e14',
+            cancelButtonColor: '#FF0000',
+            confirmButtonText: 'Yes, delete it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                @this.call('deleteCategory', categoryId);
+            }
+        });
+    }
+</script>
 <script>
     function showCreateModal() {
         console.log('Opening create modal');

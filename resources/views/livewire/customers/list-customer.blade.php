@@ -9,22 +9,6 @@
             </div>
             <ul class="table-top-head">
                 <li>
-                    <a data-bs-toggle="tooltip" data-bs-placement="top" title="Pdf"><img src="assets/img/icons/pdf.svg"
-                            alt="img" /></a>
-                </li>
-                <li>
-                    <a data-bs-toggle="tooltip" data-bs-placement="top" title="Excel"><img
-                            src="assets/img/icons/excel.svg" alt="img" /></a>
-                </li>
-                <li>
-                    <a data-bs-toggle="tooltip" data-bs-placement="top" title="Print"><i data-feather="printer"
-                            class="feather-rotate-ccw"></i></a>
-                </li>
-                <li>
-                    <a data-bs-toggle="tooltip" data-bs-placement="top" title="Refresh"><i data-feather="rotate-ccw"
-                            class="feather-rotate-ccw"></i></a>
-                </li>
-                <li>
                     <a data-bs-toggle="tooltip" data-bs-placement="top" title="Collapse" id="collapse-header"><i
                             data-feather="chevron-up" class="feather-chevron-up"></i></a>
                 </li>
@@ -61,36 +45,23 @@
                     <table class="table" id="example">
                         <thead>
                             <tr>
-                                {{--  <th class="no-sort">
-                                    <label class="checkboxs">
-                                        <input type="checkbox" id="select-all" />
-                                        <span class="checkmarks"></span>
-                                    </label>
-                                </th>  --}}
                                 <th class="text-start">No</th>
-                                <th>Name</th>
-                                <th>Username</th>
-                                <th>Phone Number</th>
-                                <th>Address</th>
-                                <th>Email</th>
+                                <th class="text-start">Name</th>
+                                <th class="text-start">Email</th>
+                                <th class="text-start">Phone Number</th>
+                                <th class="text-start">Address</th>
                                 <th class="no-sort">Action</th>
                             </tr>
                         </thead>
                         <tbody>
                             @foreach ($customers as $customer)
                                 <tr>
-                                    {{--  <td>
-                                        <label class="checkboxs">
-                                            <input type="checkbox" />
-                                            <span class="checkmarks"></span>
-                                        </label>
-                                    </td>  --}}
                                     <td class="text-start">{{ $loop->iteration }}</td>
-                                    <td>{{ $customer->user->name }}</td>
-                                    <td>{{ $customer->user->username }}</td>
-                                    <td>{{ $customer->user->phone }}</td>
-                                    <td>{{ $customer->user->address }}</td>
-                                    <td>{{ $customer->user->email }}</td>
+                                    <td class="text-start">{{ $customer->user->name ? $customer->user->name : '-'}}</td>
+                                    <td class="text-start">{{ $customer->user->email ? $customer->user->email : '-' }}
+                                    </td>
+                                    <td class="text-start">{{ $customer->user->phone ? $customer->user->phone : '-' }}</td>
+                                    <td class="text-start">{{ $customer->user->address ? $customer->user->address : '-'}}</td>
                                     <td class="action-table-data">
                                         <div class="edit-delete-action">
                                             <a class="me-2 p-2" href="javascript:void(0);" data-bs-toggle="modal"
@@ -98,8 +69,8 @@
                                                 onclick="setCustomerData({{ $customer->user->id }})">
                                                 <i data-feather="edit" class="feather-edit"></i>
                                             </a>
-                                            <a class="confirm-text p-2"
-                                                wire:click="deleteCustomer({{ $customer->user->id }})">
+                                            <a class="p-2" href="javascript:void(0);"
+                                                onclick="confirmDelete({{ $customer->user->id }})">
                                                 <i data-feather="trash-2" class="feather-trash-2"></i>
                                             </a>
                                         </div>
@@ -138,6 +109,24 @@
     </div>
 
 </div>
+<script>
+    function confirmDelete(customerId) {
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "You won't be able to revert this!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#fd7e14',
+            cancelButtonColor: '#FF0000',
+            confirmButtonText: 'Yes, delete it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                @this.call('deleteCustomer', customerId);
+            }
+        });
+    }
+</script>
+
 <script>
     function showCreateModal() {
         console.log('Opening create modal');

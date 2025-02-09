@@ -22,6 +22,7 @@ return new class extends Migration
             $table->string('payment_method')->nullable();
             $table->string('rekening')->nullable();
             $table->string('payment_ammount')->nullable();
+            $table->string('customer_name')->nullable();
             $table->foreignId('discountId')->nullable()->constrained('discounts');
             $table->foreignId('customerId')->nullable()->constrained('users');
             $table->foreignId('cashierId')->nullable()->constrained('users');

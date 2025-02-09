@@ -9,20 +9,6 @@
                 @enderror
             </div>
             <div class="mb-3 col-md-6">
-                <label class="form-label">Username</label>
-                <input type="text" class="form-control" wire:model="username" />
-                @error('username')
-                    <span class="text-danger">{{ $message }}</span>
-                @enderror
-            </div>
-            <div class="mb-3 col-md-6">
-                <label class="form-label">Password</label>
-                <input type="password" class="form-control" wire:model="password" />
-                @error('password')
-                    <span class="text-danger">{{ $message }}</span>
-                @enderror
-            </div>
-            <div class="mb-3 col-md-6">
                 <label class="form-label">Phone Number</label>
                 <input type="number" class="form-control" wire:model="phone" />
                 @error('phone')

@@ -11,12 +11,10 @@ class FormCustomer extends Component
 {
     public $customerId = null;
     public $name = '';
-    public $username = '';
     public $role = '';
     public $email = '';
     public $phone = '';
     public $address = '';
-    public $password = '';
 
     protected $listeners = ['setCustomerData'];
 
@@ -28,11 +26,9 @@ class FormCustomer extends Component
             $user = User::find($customerId);
             if ($user) {
                 $this->name = $user->name;
-                $this->username = $user->username;
                 $this->email = $user->email;
                 $this->phone = $user->phone;
                 $this->address = $user->address;
-                // $this->password = $user->password;
             }
         }
     }
@@ -45,11 +41,9 @@ class FormCustomer extends Component
             $user = user::find($this->customerId);
             if ($user) {
                 $this->name = $user->name;
-                $this->username = $user->username;
                 $this->email = $user->email;
                 $this->phone = $user->phone;
                 $this->address = $user->address;
-                $this->password = $user->password;
             }
         }
     }
@@ -58,11 +52,9 @@ class FormCustomer extends Component
     {
         $this->validate([
             'name' => 'required|string|max:255',
-            'username' => 'required|string|max:255',
-            'email' => 'required|email|max:255',
+            'email' => 'nullable|email|max:255',
             'phone' => 'required|string|max:255',
             'address' => 'required|string|max:255',
-            'password' => $this->customerId ? 'nullable|min:6' : 'required|min:6',
         ]);
 
         if ($this->customerId) {
@@ -73,24 +65,20 @@ class FormCustomer extends Component
             }
             $customer->update([
                 'name' => $this->name,
-                'username' => $this->username,
                 'role' => 'customer',
                 'email' => $this->email,
                 'phone' => $this->phone,
                 'address' => $this->address,
-                'password' => $this->password ? bcrypt($this->password) : $customer->password,
             ]);
 
             session()->flash('success', 'Customer updated successfully!');
         } else {
             $user = User::create([
                 'name' => $this->name,
-                'username' => $this->username,
                 'role' => 'customer',
                 'email' => $this->email,
                 'phone' => $this->phone,
                 'address' => $this->address,
-                'password' => bcrypt($this->password),
             ]);
 
             Customer::create([

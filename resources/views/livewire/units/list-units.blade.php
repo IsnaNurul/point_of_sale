@@ -9,22 +9,6 @@
             </div>
             <ul class="table-top-head">
                 <li>
-                    <a data-bs-toggle="tooltip" data-bs-placement="top" title="Pdf"><img src="assets/img/icons/pdf.svg"
-                            alt="img" /></a>
-                </li>
-                <li>
-                    <a data-bs-toggle="tooltip" data-bs-placement="top" title="Excel"><img
-                            src="assets/img/icons/excel.svg" alt="img" /></a>
-                </li>
-                <li>
-                    <a data-bs-toggle="tooltip" data-bs-placement="top" title="Print"><i data-feather="printer"
-                            class="feather-rotate-ccw"></i></a>
-                </li>
-                <li>
-                    <a data-bs-toggle="tooltip" data-bs-placement="top" title="Refresh"><i data-feather="rotate-ccw"
-                            class="feather-rotate-ccw"></i></a>
-                </li>
-                <li>
                     <a data-bs-toggle="tooltip" data-bs-placement="top" title="Collapse" id="collapse-header"><i
                             data-feather="chevron-up" class="feather-chevron-up"></i></a>
                 </li>
@@ -68,26 +52,20 @@
                                     </label>
                                 </th>  --}}
                                 <th class="text-start">No</th>
-                                <th>Unit</th>
-                                <th>Short Name</th>
-                                <th>Created On</th>
-                                <th>Status</th>
+                                <th class="text-start">Unit</th>
+                                <th class="text-start">Short Name</th>
+                                <th class="text-start">Created On</th>
+                                <th class="text-start">Status</th>
                                 <th class="no-sort">Action</th>
                             </tr>
                         </thead>
                         <tbody>
                             @foreach ($units as $unit)
                                 <tr>
-                                    {{--  <td>
-                                        <label class="checkboxs">
-                                            <input type="checkbox" />
-                                            <span class="checkmarks"></span>
-                                        </label>
-                                    </td>  --}}
                                     <td class="text-start">{{ $loop->iteration }}</td>
                                     <td>{{ $unit->name }}</td>
                                     <td>{{ $unit->short_name }}</td>
-                                    <td>{{ $unit->created_at ? $$unit->created_at->format('d M Y') : '' }}</td>
+                                    <td>{{ $unit->created_at ? $unit->created_at->format('d M Y') : '' }}</td>
                                     <td>
                                         <span
                                             class="badge {{ $unit->status == true ? 'badge-linesuccess' : 'badge-linedanger' }}">
@@ -100,7 +78,7 @@
                                                 data-bs-target="#unit-modal" onclick="setUnitData({{ $unit->id }})">
                                                 <i data-feather="edit" class="feather-edit"></i>
                                             </a>
-                                            <a class="confirm-text p-2" wire:click="deleteUnit({{ $unit->id }})">
+                                            <a class=" p-2" wire:click="deleteUnit({{ $unit->id }})">
                                                 <i data-feather="trash-2" class="feather-trash-2"></i>
                                             </a>
                                         </div>
@@ -108,6 +86,7 @@
                                 </tr>
                             @endforeach
                         </tbody>
+
                     </table>
                 </div>
             </div>

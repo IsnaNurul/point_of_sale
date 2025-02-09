@@ -3,40 +3,40 @@
         <div class="row">
             <div class="mb-3 col-md-6">
                 <label class="form-label">Name</label>
-                <input type="text" class="form-control" wire:model="name" />
+                <input type="text" class="form-control" wire:model="name" required/>
                 @error('name')
                     <span class="text-danger">{{ $message }}</span>
                 @enderror
             </div>
             <div class="mb-3 col-md-6">
                 <label class="form-label">Code</label>
-                <input type="text" class="form-control" wire:model="code" />
+                <input type="text" class="form-control" wire:model="code" required/>
                 @error('code')
                     <span class="text-danger">{{ $message }}</span>
                 @enderror
             </div>
-            <div class="mb-3">
+            <div class="mb-3 col-md-4">
                 <label class="form-label">Code</label>
                 <select class="form-select" id="type" wire:model="type" required>
                     <option value="" selected>--- Select Type ---</option>
-                    <option value="percent">Percent</option>
-                    <option value="fixed">Fixed</option>
+                    <option value="percent">Percent(%)</option>
+                    <option value="fixed">Fixed(Rp)</option>
                 </select>
                 @error('type')
                     <span class="text-danger">{{ $message }}</span>
                 @enderror
             </div>
-            <div class="mb-3">
-                <label class="form-label">Description</label>
-                <textarea class="form-control" wire:model="description" id="" cols="30" rows="5"></textarea>
-                @error('description')
-                    <span class="text-danger">{{ $message }}</span>
-                @enderror
-            </div>
-            <div class="mb-3 col-md-6">
+            <div class="mb-3 col-md-4">
                 <label class="form-label">Value</label>
                 <input type="number" class="form-control" wire:model="value" />
                 @error('value')
+                    <span class="text-danger">{{ $message }}</span>
+                @enderror
+            </div>
+            <div class="mb-3 col-md-4">
+                <label class="form-label">Usage Limit</label>
+                <input type="number" class="form-control" wire:model="limit" />
+                @error('limit')
                     <span class="text-danger">{{ $message }}</span>
                 @enderror
             </div>
@@ -54,10 +54,10 @@
                     <span class="text-danger">{{ $message }}</span>
                 @enderror
             </div>
-            <div class="mb-3 col-md-6">
-                <label class="form-label">Limit</label>
-                <input type="number" class="form-control" wire:model="limit" />
-                @error('limit')
+            <div class="mb-3">
+                <label class="form-label">Description</label>
+                <textarea class="form-control" wire:model="description" id="" cols="30" rows="5"></textarea>
+                @error('description')
                     <span class="text-danger">{{ $message }}</span>
                 @enderror
             </div>

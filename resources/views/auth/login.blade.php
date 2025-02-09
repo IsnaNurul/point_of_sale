@@ -62,7 +62,7 @@
                         </form>
                         <div class="signinform text-center">
                             <h4>
-                                New on our platform?<a href="register-2.html" class="hover-a">
+                                New on our platform?<a href="{{ route('register') }}" class="hover-a">
                                     Create an account</a>
                             </h4>
                         </div>

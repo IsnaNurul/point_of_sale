@@ -3,6 +3,7 @@
 namespace App\Livewire\Pos;
 
 use App\Models\Cart;
+use App\Models\Category;
 use App\Models\Product;
 use App\Models\SaleTransaction;
 use Illuminate\Support\Facades\Auth;
@@ -21,13 +22,51 @@ class Pos extends Component
     public $totalCart = 0;
     public $transactionId = 0;
     public $holdCount = 0;
+    public $categories;
+    public $search;
+    public $noProductsFound = false;
 
-    public function mount()
+    public function mount($search = null)
     {
         $this->clearCartIfNewDay();
-        $this->holdCount = SaleTransaction::where('status', 'hold')->get()->count();
-        $this->products = Product::where('qty', '>', 0)->get();
+        $this->holdCount = SaleTransaction::where('status', 'hold')->count();
+        $this->categories = Category::where('status', 'active')->get();
+
+        $this->products = Product::where('qty', '>', 0)
+            ->when($search, function ($query, $search) {
+                // Cek apakah yang dicari adalah angka (harga)
+                if (is_numeric($search)) {
+                    $query->where('price', '=', $search); // Pencarian berdasarkan harga
+                } else {
+                    $query->where('name', 'like', "%$search%")
+                        ->orWhereHas('category', function ($q) use ($search) {
+                            $q->where('category', 'like', "%$search%");
+                        });
+                }
+            })
+            ->get();
+
+        $this->noProductsFound = $this->products->isEmpty(); // Mengecek apakah produk kosong
         $this->updateCarts();
+    }
+
+    public function updatedSearch()
+    {
+        $this->products = Product::where('qty', '>', 0)
+            ->when($this->search, function ($query, $search) {
+                // Cek apakah yang dicari adalah angka (harga)
+                if (is_numeric($search)) {
+                    $query->where('price', '=', $search); // Pencarian berdasarkan harga
+                } else {
+                    $query->where('name', 'like', "%$search%")
+                        ->orWhereHas('category', function ($q) use ($search) {
+                            $q->where('category', 'like', "%$search%");
+                        });
+                }
+            })
+            ->get();
+
+        $this->noProductsFound = $this->products->isEmpty();
     }
 
     public function clearCartIfNewDay()
@@ -91,7 +130,6 @@ class Pos extends Component
                 $this->updateCarts();
                 $this->triggerEvent();
             }
-
         }
     }
 
@@ -145,7 +183,10 @@ class Pos extends Component
     public function updateCarts()
     {
         $this->holdCount = SaleTransaction::where('status', 'hold')->get()->count();
-        $this->carts = Cart::where('cashierId', Auth::id())->get();
+        $this->carts = Cart::where('cashierId', Auth::id())
+            ->orderBy('created_at', 'desc')
+            ->get();
+
         $this->cartsCount = Cart::where('cashierId', Auth::id())->get()->count();
         $this->productInCart = $this->carts->pluck('productId')->toArray();
         $this->subTotalCart = $this->carts->sum('price');
@@ -238,18 +279,31 @@ class Pos extends Component
             $transactionCode = $today . $formattedSequence;
         }
 
-        // Calculate totals
-        $subTotal = $this->subTotalCart;
-        $totalDiscount = $this->totalDiscount;
-        $totalPrice = $subTotal - $totalDiscount;
+
+        // Hitung subtotal dari cart
+        $subTotal = $this->carts->sum('price');
+
+        // Hitung diskon dari cart tanpa desimal
+        $cartDiscounts = $this->carts->map(function ($item) {
+            if ($item->discount_type === 'percent') {
+                return intval(round(($item->discount / 100) * $item->price));
+            } elseif ($item->discount_type === 'fixed') {
+                return intval($item->discount);
+            }
+            return 0;
+        });
+
+        $totalAmountCart = $subTotal - $cartDiscounts->sum();
+
+        $totalPrice = $totalAmountCart;
 
         // Save to sale_transactions table
         $saleTransaction = \App\Models\SaleTransaction::create([
             'transaction_code' => $transactionCode,
             'total_qty' => $this->carts->sum('qty'),
             'total_price' => $totalPrice,
-            'sub_total' => $subTotal,
-            'discount' => $totalDiscount,
+            'sub_total' => $totalAmountCart,
+            'discount' => '0',
             'status' => 'hold', // Status is set to hold
             'payment_method' => null, // No payment method for hold
             'discountId' => null, // Adjust if applicable
@@ -266,6 +320,8 @@ class Pos extends Component
                 'productId' => $cart->product->id,
                 'qty' => $cart->qty,
                 'price' => $cart->price,
+                'discount' => $cart->discount,
+                'discount_type' => $cart->discount_type,
             ]);
 
             // Update product stock

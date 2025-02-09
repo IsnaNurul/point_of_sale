@@ -97,7 +97,7 @@ class FormDiscount extends Component
                 'start_at' => Carbon::parse($this->start_at),
                 'end_at' => Carbon::parse($this->end_at),
                 'limit' => $this->limit,
-                'status' => $this->status,
+                'status' => 1,
             ]);
             session()->flash('success', 'Discount created successfully!');
         }

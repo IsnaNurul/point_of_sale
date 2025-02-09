@@ -52,6 +52,14 @@
                 </div>
             </div>
 
+            <div id="cash-form" class="row mb-3" style="display: block;">
+                <div>
+                    <h6 class="mb-2">Customer Name</h6>
+                    <input type="text" class="form-control" id="customer_name" placeholder="Enter Name"
+                        min="0" wire:model="customer_name">
+                </div>
+            </div>
+
             <!-- Form for Debit Card payment (hidden initially) -->
             <div id="debit-form" class="row mb-3" style="display: none;">
                 <div>
@@ -142,8 +150,9 @@
                 </div>
             </div>
             <div class="modal-footer d-sm-flex justify-content-between">
-                <button type="button" class="btn btn-primary flex-fill" wire:click="showInvoice">
-                    Print Receipt<i class="feather-arrow-right-circle icon-me-5"></i>
+                <button type="button" class="btn btn-primary flex-fill"
+                    wire:click="setInvoice('{{ $codeTransaction }}')">
+                    Print Invoice<i class="feather-arrow-right-circle icon-me-5"></i>
                 </button>
                 <button type="submit" class="btn btn-secondary flex-fill" wire:click="nextOrder">
                     Next Order<i class="feather-arrow-right-circle icon-me-5"></i>
@@ -153,127 +162,143 @@
     @endif
 
     @if ($showInvoiceModal)
-        <div class="modal fade modal-default" id="print-receipt" aria-labelledby="print-receipt">
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content">
-                    <div class="d-flex justify-content-end">
-                        <button type="button" class="close p-0" data-bs-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">×</span>
-                        </button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="icon-head text-center">
-                            <a href="javascript:void(0);">
-                                <img src="assets/img/logo.png" width="100" height="30" alt="Receipt Logo" />
-                            </a>
-                        </div>
-                        <div class="text-center info text-center">
-                            <h6>Dreamguys Technologies Pvt Ltd.,</h6>
-                            <p class="mb-0">Phone Number: +1 5656665656</p>
-                            <p class="mb-0">
-                                Email:
-                                <a href="/cdn-cgi/l/email-protection#cca9b4ada1bca0a98caba1ada5a0e2afa3a1"><span
-                                        class="__cf_email__"
-                                        data-cfemail="fd98859c908d9198bd9a909c9491d39e9290">[email&#160;protected]</span></a>
-                            </p>
-                        </div>
-                        <div class="tax-invoice">
-                            <h6 class="text-center">Tax Invoice</h6>
-                            <div class="row">
-                                <div class="col-sm-12 col-md-6">
-                                    <div class="invoice-user-name">
-                                        <span>Name: </span><span>John Doe</span>
-                                    </div>
-                                    <div class="invoice-user-name">
-                                        <span>Invoice No: </span><span>CS132453</span>
-                                    </div>
-                                </div>
-                                <div class="col-sm-12 col-md-6">
-                                    <div class="invoice-user-name">
-                                        <span>Customer Id: </span><span>#LL93784</span>
-                                    </div>
-                                    <div class="invoice-user-name">
-                                        <span>Date: </span><span>01.07.2022</span>
-                                    </div>
-                                </div>
+        <div class="modal-content" id="print-receipt">
+            <div class="modal-body">
+                <div class="icon-head text-center">
+                    <a href="javascript:void(0);">
+                        <img src="assets/img/logo.png" width="100" height="30" alt="Receipt Logo" />
+                    </a>
+                </div>
+                <div class="text-center info text-center">
+                    <h6>Dreamguys Technologies Pvt Ltd.,</h6>
+                    <p class="mb-0">Phone Number: +1 5656665656</p>
+                    <p class="mb-0">
+                        Email:
+                        <a href="/cdn-cgi/l/email-protection#cca9b4ada1bca0a98caba1ada5a0e2afa3a1"><span
+                                class="__cf_email__"
+                                data-cfemail="fd98859c908d9198bd9a909c9491d39e9290">[email&#160;protected]</span></a>
+                    </p>
+                </div>
+                <div class="tax-invoice">
+                    <h6 class="text-center">Tax Invoice</h6>
+                    <div class="row">
+                        <div class="col-sm-12 col-md-8">
+                            <div class="invoice-user-name">
+                                <span>Transaction ID:
+                                </span><span>{{ $saleTransaction->transaction_code ? $saleTransaction->transaction_code : 'N/A' }}</span>
+                            </div>
+                            <div class="invoice-user-name">
+                                <span>Customer:
+                                </span><span>{{ $saleTransaction->customer_name ? $saleTransaction->customer_name : 'N/A' }}</span>
                             </div>
                         </div>
-                        <table class="table-borderless w-100 table-fit">
-                            <thead>
-                                <tr>
-                                    <th># Item</th>
-                                    <th>Price</th>
-                                    <th>Qty</th>
-                                    <th class="text-end">Total</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>1. Red Nike Laser</td>
-                                    <td>$50</td>
-                                    <td>3</td>
-                                    <td class="text-end">$150</td>
-                                </tr>
-                                <tr>
-                                    <td>2. Iphone 14</td>
-                                    <td>$50</td>
-                                    <td>2</td>
-                                    <td class="text-end">$100</td>
-                                </tr>
-                                <tr>
-                                    <td>3. Apple Series 8</td>
-                                    <td>$50</td>
-                                    <td>3</td>
-                                    <td class="text-end">$150</td>
-                                </tr>
-                                <tr>
-                                    <td colspan="4">
-                                        <table class="table-borderless w-100 table-fit">
-                                            <tr>
-                                                <td>Sub Total :</td>
-                                                <td class="text-end">$700.00</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Discount :</td>
-                                                <td class="text-end">-$50.00</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Shipping :</td>
-                                                <td class="text-end">0.00</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Tax (5%) :</td>
-                                                <td class="text-end">$5.00</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Total Bill :</td>
-                                                <td class="text-end">$655.00</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Due :</td>
-                                                <td class="text-end">$0.00</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Total Payable :</td>
-                                                <td class="text-end">$655.00</td>
-                                            </tr>
-                                        </table>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                        <div class="text-center invoice-bar">
-                            <p>
-                                **VAT against this challan is payable through central
-                                registration. Thank you for your business!
-                            </p>
-                            <a href="javascript:void(0);">
-                                <img src="assets/img/barcode/barcode-03.jpg" alt="Barcode" />
-                            </a>
-                            <p>Sale 31</p>
-                            <p>Thank You For Shopping With Us. Please Come Again</p>
-                            <a href="javascript:void(0);" class="btn btn-primary">Print Receipt</a>
+                        <div class="col-sm-12 col-md-4">
+                            <div class="invoice-user-name">
+                                <span>Date: </span><span>{{ $saleTransaction->created_at }}</span>
+                            </div>
                         </div>
+                    </div>
+                </div>
+                <table class="table-borderless w-100 table-fit">
+                    <thead>
+                        <tr>
+                            <th># Item</th>
+                            <th>Price</th>
+                            <th>Qty</th>
+                            <th class="text-end">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach ($saleItem as $key => $item)
+                            <tr>
+                                <td>{{ $key + 1 }}. {{ $item->product->name }}</td>
+                                @php
+                                    // Default nilai diskon adalah 0
+                                    $discount_nominal = 0;
+
+                                    // Periksa apakah ada diskon
+                                    if ($item->discount) {
+                                        if ($item->discount_type == 'percent') {
+                                            $discount_nominal = ($item->price * $item->discount) / 100; // Diskon persentase
+                                        } elseif ($item->discount_type == 'fixed') {
+                                            $discount_nominal = $item->discount; // Diskon tetap
+                                        }
+                                    }
+                                @endphp
+                                <td>
+                                    {{ number_format($item->product->price, 0, ',', '.') }}
+                                    @if ($discount_nominal > 0)
+                                        <br>
+                                        (-{{ number_format($discount_nominal, 0, ',', '.') }})
+                                    @endif
+                                </td>
+                                <td>{{ $item->qty }}</td>
+                                <td class="text-end">
+                                    {{ number_format($item->price, 0, ',', '.') }}
+                                    @if ($discount_nominal > 0)
+                                    <br>
+                                    ({{ number_format($item->price - $discount_nominal, 0, ',', '.') }})
+                                    @endif
+                                </td>
+                            </tr>
+                        @endforeach
+
+                        <tr>
+                            <td colspan="4">
+                                <table class="table-borderless w-100 table-fit">
+                                    <tr>
+                                        <td>Sub Total :</td>
+                                        <td class="text-end">Rp.
+                                            {{ number_format($saleTransaction->sub_total, 0, ',', '.') }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Discount :</td>
+                                        @php
+                                            // Default nilai diskon adalah 0
+                                            $discount_nominal2 = 0;
+
+                                            // Periksa apakah ada diskon
+                                            if ($saleTransaction->discount) {
+                                                if ($saleTransaction->discount <= 100) {
+                                                    $discount_nominal2 =
+                                                        ($saleTransaction->sub_total * $saleTransaction->discount) /
+                                                        100; // Diskon persentase
+                                                } elseif ($saleTransaction->discount > 100) {
+                                                    $discount_nominal = $saleTransaction->discount; // Diskon tetap
+                                                }
+                                            }
+                                        @endphp
+                                        <td class="text-end">
+                                            @if ($discount_nominal > 0)
+                                                (-{{ number_format($discount_nominal, 0, ',', '.') }})
+                                            @else 
+                                            -
+                                            @endif
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Total Payable :</td>
+                                        <td class="text-end">Rp.
+                                            {{ number_format($saleTransaction->total_price, 0, ',', '.') }}</td>
+                                    </tr>
+                                </table>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="text-center invoice-bar">
+                    <p>
+                        **VAT against this challan is payable through central
+                        registration. Thank you for your business!
+                    </p>
+                    <a href="javascript:void(0);">
+                        <img src="assets/img/barcode/barcode-03.jpg" alt="Barcode" />
+                    </a>
+                    <p>Sale 31</p>
+                    <p>Thank You For Shopping With Us. Please Come Again</p>
+                    <div class="d-flex justify-content-center">
+                        {{-- <a href="javascript:void(0);" class="btn btn-primary m-2">Print Invoice</a> --}}
+                        <a href="{{ route('pos') }}" class="btn btn-secondary m-2">Close</a>
                     </div>
                 </div>
             </div>

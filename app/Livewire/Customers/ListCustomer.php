@@ -25,8 +25,10 @@ class ListCustomer extends Component
                 $user->delete();
                 $this->refreshCustomer();
                 session()->flash('success', 'Customer deleted successfully!');
+                return redirect('customers');
             } else {
                 session()->flash('error', 'Customer not defined!');
+                return redirect('customers');
             }
         } catch (QueryException $e) {
             $this->handleQueryException($e);

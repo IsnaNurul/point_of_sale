@@ -16,7 +16,7 @@ class ListHold extends Component
     public function mount()
     {
         // Fetch holds from the database
-        $this->holds = SaleTransaction::where('status', 'hold')->get();
+        $this->holds = SaleTransaction::where('status', 'hold')->orderBy('transaction_code', 'desc')->get();
         $this->holdCount = $this->holds->count();
         $this->updateData();
     }

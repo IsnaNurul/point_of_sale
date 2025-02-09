@@ -20,6 +20,7 @@ return new class extends Migration
             $table->string('description')->nullable();
             $table->boolean('status')->default(true);
             $table->tinyText('image')->nullable();
+            $table->date('expired')->nullable();
             $table->foreignId('categoryId')->constrained('categories');
             $table->foreignId('unitId')->constrained('units');
             $table->foreignId('userId')->constrained('users');

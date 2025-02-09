@@ -24,13 +24,15 @@ class ListCategory extends Component
             if ($category) {
                 if ($category->status === 'Active') {
                     session()->flash('error', 'Category cannot be deleted because it is currently active.');
-                    return;
+                    return redirect('category');
                 }
                 $category->delete();
                 $this->refreshCategory();
                 session()->flash('success', 'Category deleted successfully!');
+                return redirect('category');
             } else {
                 session()->flash('error', 'Category not defined!');
+                return redirect('category');
             }
         } catch (QueryException $e) {
             $this->handleQueryException($e);

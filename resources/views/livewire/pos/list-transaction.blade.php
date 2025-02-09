@@ -78,6 +78,20 @@
                     <a href="{{ route('transaction') }}" class="btn btn-primary" data-bs-target="#recents"><span
                             class="me-1 d-flex align-items-center"><i data-feather="refresh-ccw"
                                 class="feather-16"></i></span>Transaction</a>
+                    <ul class="table-top-head">
+                        {{-- <li>
+                            <a data-bs-toggle="tooltip" data-bs-placement="top" title="Pdf"><img
+                                    src="assets/img/icons/pdf.svg" alt="img" /></a>
+                        </li> --}}
+                        <li>
+                            <a class="btn btn-outline-success" href="{{ route('pos.export.excel') }}" data-bs-toggle="tooltip" data-bs-placement="top"
+                                title="Excel"><img src="assets/img/icons/excel.svg" alt="img" />Export Excel</a>
+                        </li>
+                        {{-- <li>
+                            <a data-bs-toggle="tooltip" data-bs-placement="top" title="Print"><i data-feather="printer"
+                                    class="feather-rotate-ccw"></i></a>
+                        </li> --}}
+                    </ul>
                 </div>
 
                 <div class="p-3 tabs_wrapper">
@@ -89,131 +103,77 @@
                         </div>
                         <div class="card table-list-card">
                             <div class="card-body">
-                                <div class="table-top">
-                                    <div>
-                                        
-                                    </div>
-                                    <ul class="table-top-head">
-                                        <li>
-                                            <a data-bs-toggle="tooltip" data-bs-placement="top" title="Pdf"><img
-                                                    src="assets/img/icons/pdf.svg" alt="img" /></a>
-                                        </li>
-                                        <li>
-                                            <a data-bs-toggle="tooltip" data-bs-placement="top" title="Excel"><img
-                                                    src="assets/img/icons/excel.svg" alt="img" /></a>
-                                        </li>
-                                        <li>
-                                            <a data-bs-toggle="tooltip" data-bs-placement="top" title="Print"><i
-                                                    data-feather="printer" class="feather-rotate-ccw"></i></a>
-                                        </li>
-                                    </ul>
-
-                                </div>
-
-                                <div class="table-responsive">
-                                    <table class="table table-striped">
+                                <div class="table-responsive product-list">
+                                    <table class="table" id="example">
                                         <thead>
                                             <tr>
-                                                <th class="no-sort">
-                                                    <label class="checkboxs">
-                                                        <input type="checkbox" id="select-all" />
-                                                        <span class="checkmarks"></span>
-                                                    </label>
-                                                </th>
-                                                <th>Transaction Id</th>
-                                                <th>Date</th>
-                                                <th>Total Product</th>
-                                                <th>Sub Total</th>
-                                                <th>Discount</th>
-                                                <th>Total Price</th>
-                                                <th>Payment Method</th>
-                                                <th>Status</th>
+                                                <th class="text-start">Transaction Id</th>
+                                                <th class="text-start">Date</th>
+                                                <th class="text-start">Cashier</th>
+                                                <th class="text-start">Total Qty</th>
+                                                <th class="text-start">Sub Total</th>
+                                                <th class="text-start">Discount</th>
+                                                <th class="text-start">Total Price</th>
+                                                <th class="text-start">Payment Amount</th>
+                                                <th class="text-start">Change</th>
+                                                <th class="text-start">Payment Method</th>
+                                                <th class="text-start">Status</th>
                                                 <th class="text-center">Action</th>
                                             </tr>
                                         </thead>
-                                        <tbody class="sales-list">
-                                            @if ($sales->isEmpty())
+                                        <tbody>
+                                            @foreach ($sales as $sale)
                                                 <tr>
-                                                    <td colspan="10" class="text-center">No transactions found</td>
-                                                </tr>
-                                            @else
-                                                @foreach ($sales as $sale)
-                                                    <tr>
-                                                        <td>
-                                                            <label class="checkboxs">
-                                                                <input type="checkbox" />
-                                                                <span class="checkmarks"></span>
-                                                            </label>
-                                                        </td>
-                                                        <td>#{{ $sale->transaction_code }}</td>
-                                                        <td>{{ $sale->created_at }}</td>
-                                                        <td>{{ $sale->total_qty }}</td>
-                                                        <td>{{ number_format($sale->sub_total, 0, ',', '.') }}</td>
-                                                        <td>{{ number_format($sale->discount, 0, ',', '.') }}</td>
-                                                        <td>{{ number_format($sale->total_price, 0, ',', '.') }}</td>
-                                                        <td><b>{{ $sale->payment_method }}</b></td>
-                                                        <td>
-                                                            <span
-                                                                class="badge badge-{{ $sale->status === 'success' ? 'success' : ($sale->status === 'hold' ? 'warning' : 'danger') }}">
-                                                                {{ $sale->status }}
-                                                            </span>
-                                                        </td>
-                                                        <td class="text-center">
-                                                            <a class="action-set" href="javascript:void(0);"
-                                                                data-bs-toggle="dropdown" aria-expanded="true">
-                                                                <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
+                                                    <td class="text-start">#{{ $sale->transaction_code }}</td>
+                                                    <td class="text-start">{{ $sale->created_at }}</td>
+                                                    <td class="text-start">{{ $sale->user->name }}</td>
+                                                    <td class="text-start">{{ $sale->total_qty }}</td>
+                                                    <td class="text-start">
+                                                        {{ number_format($sale->sub_total, 0, ',', '.') }}</td>
+                                                    <td class="text-start">
+                                                        {{ number_format($sale->discount, 0, ',', '.') }}</td>
+                                                    <td class="text-start">
+                                                        {{ number_format($sale->total_price, 0, ',', '.') }}</td>
+                                                    <td class="text-start">
+                                                        {{ $sale->payment_ammount ? number_format($sale->payment_ammount, 0, ',', '.') : '-' }}
+                                                    </td>
+                                                    @if ($sale->payment_ammount)
+                                                        <td class="text-start">
+                                                            {{ number_format($sale->payment_ammount - $sale->total_price, 0, ',', '.') }}</td>
+                                                    @else
+                                                        <td class="text-start">-</td>
+                                                    @endif
+                                                    @if ($sale->payment_method == 'debit')
+                                                        <td class="text-start"><b>{{ $sale->bank_name }} -
+                                                                {{ $sale->rekening }}</b></td>
+                                                    @elseif ($sale->payment_method == 'cash')
+                                                        <td class="text-start"><b>{{ $sale->payment_method }}</b></td>
+                                                    @else
+                                                        <td>-</td>
+                                                    @endif
+                                                    <td class="text-start">
+                                                        <span
+                                                            class="badge badge-{{ $sale->status === 'success' ? 'success' : ($sale->status === 'hold' ? 'warning' : 'danger') }}">
+                                                            {{ $sale->status }}
+                                                        </span>
+                                                    </td>
+                                                    <td class="action-table-data text-center">
+                                                        <div class="edit-delete-action">
+                                                            <a class="me-2 p-2" data-bs-toggle="modal"
+                                                                data-bs-target="#product-modal"
+                                                                onclick="transactionDetail({{ $sale->id }})">
+                                                                <i data-feather="eye" class="feather-edit"></i>
                                                             </a>
-                                                            <ul class="dropdown-menu">
-                                                                <li>
-                                                                    <a href="javascript:void(0);" class="dropdown-item"
-                                                                        data-bs-toggle="modal"
-                                                                        data-bs-target="#sales-details-new"><i
-                                                                            data-feather="eye"
-                                                                            class="info-img"></i>Sale
-                                                                        Detail</a>
-                                                                </li>
-                                                                <li>
-                                                                    <a href="javascript:void(0);"
-                                                                        class="dropdown-item" data-bs-toggle="modal"
-                                                                        data-bs-target="#edit-sales-new"><i
-                                                                            data-feather="edit"
-                                                                            class="info-img"></i>Edit
-                                                                        Sale</a>
-                                                                </li>
-                                                                <li>
-                                                                    <a href="javascript:void(0);"
-                                                                        class="dropdown-item" data-bs-toggle="modal"
-                                                                        data-bs-target="#showpayment"><i
-                                                                            data-feather="dollar-sign"
-                                                                            class="info-img"></i>Show
-                                                                        Payments</a>
-                                                                </li>
-                                                                <li>
-                                                                    <a href="javascript:void(0);"
-                                                                        class="dropdown-item" data-bs-toggle="modal"
-                                                                        data-bs-target="#createpayment"><i
-                                                                            data-feather="plus-circle"
-                                                                            class="info-img"></i>Create Payment</a>
-                                                                </li>
-                                                                <li>
-                                                                    <a href="javascript:void(0);"
-                                                                        class="dropdown-item"><i
-                                                                            data-feather="download"
-                                                                            class="info-img"></i>Download pdf</a>
-                                                                </li>
-                                                                <li>
-                                                                    <a href="javascript:void(0);"
-                                                                        class="dropdown-item confirm-text mb-0"><i
-                                                                            data-feather="trash-2"
-                                                                            class="info-img"></i>Delete
-                                                                        Sale</a>
-                                                                </li>
-                                                            </ul>
-                                                        </td>
-                                                    </tr>
-                                                @endforeach
-                                            @endif
+
+                                                            {{-- <a class="p-2">
+                                                                <i data-feather="download" class="feather-edit"></i>
+                                                            </a> --}}
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            @endforeach
                                         </tbody>
+
                                     </table>
                                 </div>
                             </div>
@@ -226,21 +186,19 @@
     <!-- Modal form -->
     <div class="modal fade" id="product-modal" tabindex="-1" aria-labelledby="product-modal-label"
         data-bs-backdrop="static" aria-hidden="true" role="dialog">
-        <div class="modal-dialog modal-dialog-centered custom-modal-two">
+        <div class="modal-dialog sales-details-modal">
             <div class="modal-content">
-                <div class="page-wrapper-new p-0">
-                    <div class="content">
-                        <div class="modal-header border-0 custom-modal-header">
-                            <div class="page-title">
-                                <h4 id="modal-title">List Product</h4>
+                <div class="page-wrapper details-blk">
+                    <div class="content p-0">
+                        <div class="page-header p-4 mb-0">
+                            <div class="add-item d-flex">
                             </div>
                             <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
                                 <span aria-hidden="true">&times;</span>
                             </button>
                         </div>
-                        <div class="modal-body custom-modal-body">
-                            <livewire:pos.modal-product />
-                        </div>
+                        <livewire:pos.transaction-detail />
+
                     </div>
                 </div>
             </div>
@@ -258,23 +216,11 @@
         window.dispatchEvent(resetEvent);
     }
 
-    function setProductModal(SaleId) {
+    function transactionDetail(SaleId) {
         console.log('Event will be dispatched with categoryId: ', SaleId);
 
         // Dispatch event dengan ID kategori
-        const event = new CustomEvent('setProductModal', {
-            detail: {
-                SaleId: SaleId
-            },
-        });
-        window.dispatchEvent(event);
-    }
-
-    function setCancel(SaleId) {
-        console.log('Event will be dispatched with categoryId: ', SaleId);
-
-        // Dispatch event dengan ID kategori
-        const event = new CustomEvent('setCancel', {
+        const event = new CustomEvent('transactionDetail', {
             detail: {
                 SaleId: SaleId
             },

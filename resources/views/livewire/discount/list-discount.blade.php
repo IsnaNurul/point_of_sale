@@ -9,22 +9,6 @@
             </div>
             <ul class="table-top-head">
                 <li>
-                    <a data-bs-toggle="tooltip" data-bs-placement="top" title="Pdf"><img src="assets/img/icons/pdf.svg"
-                            alt="img" /></a>
-                </li>
-                <li>
-                    <a data-bs-toggle="tooltip" data-bs-placement="top" title="Excel"><img
-                            src="assets/img/icons/excel.svg" alt="img" /></a>
-                </li>
-                <li>
-                    <a data-bs-toggle="tooltip" data-bs-placement="top" title="Print"><i data-feather="printer"
-                            class="feather-rotate-ccw"></i></a>
-                </li>
-                <li>
-                    <a data-bs-toggle="tooltip" data-bs-placement="top" title="Refresh"><i data-feather="rotate-ccw"
-                            class="feather-rotate-ccw"></i></a>
-                </li>
-                <li>
                     <a data-bs-toggle="tooltip" data-bs-placement="top" title="Collapse" id="collapse-header"><i
                             data-feather="chevron-up" class="feather-chevron-up"></i></a>
                 </li>
@@ -90,7 +74,7 @@
                                     </td>  --}}
                                     <td class="text-start">{{ $loop->iteration }}</td>
                                     <td>{{ $discount->name }}</td>
-                                    <td>{{ $discount->code }}</td>
+                                    <td class="fw-bold">{{ $discount->code }}</td>
                                     <td>{{ $discount->type === 'percent' ? 'Percent' : 'Fixed' }}</td>
                                     <td>{{ $discount->value }}</td>
                                     <td>{{ \Carbon\Carbon::parse($discount->start_at)->locale('id')->isoFormat('D MMMM YYYY HH:mm') ?? '' }}
@@ -100,7 +84,9 @@
                                     <td>{{ $discount->limit }} Transaction</td>
                                     <td>
                                         <span
-                                            class="badge {{ $discount->status == 1 ? 'badge-linesuccess' : 'badge-linedanger' }}">
+                                            class="badge {{ $discount->status == 1 ? 'badge-linesuccess' : 'badge-linedanger' }}"
+                                            wire:click="toggleStatus({{ $discount->id }})" style="cursor: pointer;"
+                                            title="Click to toggle status">
                                             {{ $discount->status == 1 ? 'Active' : 'Inactive' }}
                                         </span>
                                     </td>

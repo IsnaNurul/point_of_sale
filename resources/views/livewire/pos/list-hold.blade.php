@@ -90,21 +90,16 @@
                                                             <td class="text">{{ $hold->user->name }}</td>
                                                         </tr>
                                                         <tr>
-                                                            <td>Customer</td>
+                                                            <td>Total</td>
                                                             <td class="colon">:</td>
-                                                            <td class="text">Botsford</td>
+                                                            <td class="text fw-bold">
+                                                                {{ number_format($hold->total_price, 0, ',', '.') }}
+                                                            </td>
                                                         </tr>
                                                     </table>
                                                 </div>
                                                 <div class="col-sm-12 col-md-6 record mb-3">
                                                     <table>
-                                                        <tr>
-                                                            <td>Total</td>
-                                                            <td class="colon">:</td>
-                                                            <td class="text">
-                                                                {{ number_format($hold->total_price, 0, ',', '.') }}
-                                                            </td>
-                                                        </tr>
                                                         <tr>
                                                             <td>Date</td>
                                                             <td class="colon">:</td>
@@ -114,8 +109,11 @@
                                                 </div>
                                             </div>
                                             <div class="btn-row d-sm-flex align-items-center justify-content-between">
-                                                <a href="javascript:void(0);"
-                                                    class="btn btn-info btn-icon flex-fill">Open</a>
+                                                {{-- <a class="btn btn-warning btn-icon flex-fill"
+                                                    href="{{ route('hold-pos', $hold->id) }}">Next</a> --}}
+                                                <a data-bs-toggle="modal" data-bs-target="#category-modal"
+                                                    onclick="setTotalCart({{ $hold->id }})"
+                                                    class="btn btn-info btn-icon flex-fill">Payment</a>
                                                 <a data-bs-toggle="modal" data-bs-target="#product-modal"
                                                     onclick="setProductModal({{ $hold->id }})"
                                                     class="btn btn-success btn-icon flex-fill">Products</a>
@@ -135,7 +133,7 @@
     <!-- Modal form -->
     <div class="modal fade" id="product-modal" tabindex="-1" aria-labelledby="product-modal-label"
         data-bs-backdrop="static" aria-hidden="true" role="dialog">
-        <div class="modal-dialog modal-dialog-centered custom-modal-two">
+        <div class="modal-dialog sales-details-modal">
             <div class="modal-content">
                 <div class="page-wrapper-new p-0">
                     <div class="content">
@@ -155,6 +153,21 @@
             </div>
         </div>
     </div>
+    <!-- Modal form -->
+    <div class="modal fade" id="category-modal" tabindex="-1" aria-labelledby="category-modal-label"
+        data-bs-backdrop="static" aria-hidden="true" role="dialog">
+        <div class="modal-dialog modal-dialog-centered custom-modal-two">
+            <div class="modal-content">
+                <div class="page-wrapper-new p-0">
+                    <div class="content">
+                        <div class="modal-body custom-modal-body">
+                            <livewire:pos.form-payment />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <script>
@@ -165,6 +178,18 @@
         // Dispatch event untuk reset form
         const resetEvent = new CustomEvent('resetForm');
         window.dispatchEvent(resetEvent);
+    }
+
+    function setTotalCart(totalCart) {
+        console.log('Event will be dispatched with categoryId: ', totalCart);
+
+        // Dispatch event dengan ID kategori
+        const event = new CustomEvent('setTotalCart', {
+            detail: {
+                totalCart: totalCart
+            },
+        });
+        window.dispatchEvent(event);
     }
 
     function setProductModal(SaleId) {
@@ -195,6 +220,20 @@
 <script>
     document.addEventListener('DOMContentLoaded', () => {
         const modal = document.getElementById('product-modal');
+
+        modal.addEventListener('hidden.bs.modal', () => {
+            console.log('Modal closed, resetting data...');
+
+            // Dispatch event untuk reset data di modal
+            const resetEvent = new CustomEvent('resetForm');
+            window.dispatchEvent(resetEvent);
+        });
+    });
+</script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const modal = document.getElementById('category-modal');
 
         modal.addEventListener('hidden.bs.modal', () => {
             console.log('Modal closed, resetting data...');

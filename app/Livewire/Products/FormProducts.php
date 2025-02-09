@@ -16,6 +16,7 @@ class FormProducts extends Component
     use WithFileUploads;
     public $productId;
     public $sku, $status, $name, $price, $qty, $description, $categoryId, $unitId, $image;
+    public $expired;
     public $existingImage;
 
     public function mount($productId = null)
@@ -32,6 +33,7 @@ class FormProducts extends Component
                 $this->status = $product->status;
                 $this->categoryId = $product->categoryId;
                 $this->unitId = $product->unitId;
+                $this->expired = $product->expired;
                 $this->existingImage = $product->image;
             }
         }
@@ -49,6 +51,7 @@ class FormProducts extends Component
             'image' => 'nullable|image|mimes:jpg,jpeg,png,gif|max:2048',
             'categoryId' => 'required',
             'unitId' => 'required',
+            'expired' => 'nullable|date',
         ];
 
         $data = $this->validate($rules);
@@ -79,11 +82,13 @@ class FormProducts extends Component
             // Update Produk
             $product = Product::find($this->productId);
             $product->update($data);
-            session()->flash('message', 'Product updated successfully.');
+            session()->flash('success', 'Product updated successfully.');
+            return redirect()->route('products');
         } else {
             // Tambah Produk Baru
             Product::create($data);
-            session()->flash('message', 'Product added successfully.');
+            session()->flash('success', 'Product added successfully.');
+            return redirect()->route('products');
         }
 
         $this->reset();

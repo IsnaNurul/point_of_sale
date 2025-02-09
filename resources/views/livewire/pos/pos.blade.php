@@ -1,4 +1,54 @@
 <div class="page-wrapper pos-pg-wrapper ms-0">
+    <style>
+        .scroll-container {
+            max-height: 600px;
+            /* Atur sesuai kebutuhan Anda */
+            overflow-y: auto;
+            padding-right: 10px;
+            /* Tambahan untuk spacing jika diperlukan */
+            scrollbar-width: thin;
+            /* Untuk browser modern */
+        }
+
+        .scroll-container::-webkit-scrollbar {
+            width: 8px;
+            /* Lebar scrollbar */
+        }
+
+        .scroll-container::-webkit-scrollbar-thumb {
+            background-color: #ccc;
+            /* Warna scrollbar */
+            border-radius: 4px;
+        }
+
+        .scroll-container::-webkit-scrollbar-thumb:hover {
+            background-color: #aaa;
+            /* Warna scrollbar saat hover */
+        }
+
+        .select2-container .select2-selection--single {
+            background-color: #f8f9fa;
+            border: 1px solid #ced4da;
+            border-radius: 8px;
+            height: 38px;
+            padding: 5px 10px;
+        }
+
+        .select2-container .select2-selection--single .select2-selection__arrow {
+            height: 36px;
+            
+        }
+
+        .select2-container .select2-selection--single .select2-selection__rendered {
+            color: #495057;
+            font-size: 14px;
+            padding-left: 10px;
+        }
+
+        .select2-container span b {
+            display: none;
+        }
+    </style>
     <div class="content pos-design p-0">
         <div class="row align-items-start pos-wrapper">
             @if (session()->has('error'))
@@ -12,29 +62,45 @@
             @endif
             <div class="col-md-12 col-lg-7">
                 <div class="btn-row d-sm-flex align-items-center">
-                    <a href="{{ route('pos') }}" class="btn btn-secondary mb-xs-3" data-bs-toggle="modal"
-                        data-bs-target="#orders"><span class="me-1 d-flex align-items-center"><i
-                                data-feather="shopping-cart" class="feather-16"></i></span>POS</a>
+                    <a href="{{ route('pos') }}" class="btn btn-secondary mb-xs-3" data-bs-target="#orders"><span
+                            class="me-1 d-flex align-items-center"><i data-feather="shopping-cart"
+                                class="feather-16"></i></span>POS</a>
                     <a href="{{ route('hold') }}" class="btn btn-info"><span class="me-1 d-flex align-items-center"><i
                                 data-feather="rotate-cw" class="feather-16"></i></span>Hold ({{ $holdCount }})</a>
-                    <a href="javascript:void(0);" class="btn btn-primary" data-bs-toggle="modal"
-                        data-bs-target="#recents"><span class="me-1 d-flex align-items-center"><i
-                                data-feather="refresh-ccw" class="feather-16"></i></span>Transaction</a>
+                    <a href="{{ route('transaction') }}" class="btn btn-primary" data-bs-target="#recents"><span
+                            class="me-1 d-flex align-items-center"><i data-feather="refresh-ccw"
+                                class="feather-16"></i></span>Transaction</a>
                 </div>
                 <div class="pos-categories tabs_wrapper">
                     <div class="pos-products">
-                        <div class="d-flex align-items-center justify-content-between">
-                            <h5 class="mb-3">Products</h5>
+                        <div class="row mb-3">
+                            <div class="col-4">
+                                <h5 class="">List Products</h5>
+                            </div>
+                            <div class="col-8 d-flex justify-content-end align-items-end">
+                                <!-- Search form -->
+                                <div class="input-group w-50 me-4 mb-3">
+                                    <input type="text" class="form-control" placeholder="Search Products..."
+                                        wire:model.lazy="search">
+                                    <span class="input-group-text btn-searchset">
+                                        <img src="assets/img/icons/search-white.svg" alt="img" />
+                                    </span>
+                                </div>
+                            </div>
                         </div>
+
+
                         <div class="tabs_container">
                             <div class="tab_content active" data-tab="all">
                                 <div class="row scroll-container">
-                                    @foreach ($products as $product)
+                                    @forelse ($products as $product)
                                         <div class="col-sm-2 col-md-6 col-lg-3 col-xl-3">
                                             <div class="product-info default-cover card {{ in_array($product->id, $productInCart) ? 'active' : '' }}"
                                                 wire:click="addToCart({{ $product->id }})">
-                                                <a href="javascript:void(0);" class="img-bg">
-                                                    <img src="{{ asset('storage/' . $product->image) }}" alt="Products" />
+                                                <a href="javascript:void(0);" class="img-bg" style="overflow: hidden">
+                                                    <img src="{{ asset('storage/' . $product->image) }}" alt="Products"
+                                                        class="product-img"
+                                                        style="max-width: 100%; height: auto; object-fit: cover;border-radius:8px;" width="50px" />
                                                     <span><i data-feather="check" class="feather-16"></i></span>
                                                 </a>
                                                 <h6 class="cat-name">
@@ -49,7 +115,11 @@
                                                 </div>
                                             </div>
                                         </div>
-                                    @endforeach
+                                    @empty
+                                        <div class="col-12 text-center mt-5 mb-5">
+                                            <p>Product Not Found.</p>
+                                        </div>
+                                    @endforelse
                                 </div>
                             </div>
                         </div>
@@ -67,6 +137,8 @@
                             <span>{{ now()->format('d/m/Y') }}</span>
                         </div>
                     </div>
+                    <div class="customer-info block-section">
+                    </div>
                     <div class="scroll-container2">
                         <div class="product-added block-section">
                             <div class="head-text d-flex align-items-center justify-content-between">
@@ -79,8 +151,10 @@
                                     <div class="product-list d-flex align-items-center justify-content-between">
                                         <div class="d-flex align-items-center product-info" data-bs-toggle="modal"
                                             data-bs-target="#products">
-                                            <a href="javascript:void(0);" class="img-bg">
-                                                <img src="{{ asset('storage/' . $cart->product->image) }}" alt="Products" />
+                                            <a href="javascript:void(0);" class="img-bg" style="overflow: hidden">
+                                                <img src="{{ asset('storage/' . $cart->product->image) }}"
+                                                    alt="Products"
+                                                    style="max-width: 100%; height: auto; object-fit: cover;border-radius:8px;wi" />
                                             </a>
                                             <div class="info">
                                                 <span>{{ $cart->product->sku }}</span>
@@ -154,7 +228,8 @@
                                     </tr>
                                     <tr>
                                         <td class="danger">Discount</td>
-                                        <td class="danger text-end">{{ number_format($totalDiscount, 0, ',', '.') }}</td>
+                                        <td class="danger text-end">{{ number_format($totalDiscount, 0, ',', '.') }}
+                                        </td>
                                     </tr>
                                     <tr style="border-top: 2px solid #797979;">
                                         <td>Total</td>
